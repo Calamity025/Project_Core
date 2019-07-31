@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using DAL.Repositories;
 using Entities;
 
 namespace DAL.Interfaces
@@ -10,7 +11,9 @@ namespace DAL.Interfaces
         IUserRepository UserInfos { get; }
         ITagRepository Tags { get; }
         ICategoryRepository Categories { get; }
+        ImageRepository ImageRepository { get; }
 
+        void Update(object item);
         void SaveChanges();
         Task SaveChangesAsync();
     }

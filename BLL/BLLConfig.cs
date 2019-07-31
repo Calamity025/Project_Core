@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Net.WebSockets;
 using System.Text;
-using Autofac;
 using DAL;
 using DAL.Interfaces;
 using Entities;

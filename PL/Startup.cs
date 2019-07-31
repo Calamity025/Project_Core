@@ -23,7 +23,7 @@ namespace PL
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public IServiceProvider ConfigureServices(IServiceCollection services)
+        public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
@@ -33,15 +33,8 @@ namespace PL
                 configuration.RootPath = "ClientApp/dist";
             });
 
-            // Create the container builder.
-            var builder = new ContainerBuilder();
-
-            builder.Populate(services);
-            builder.RegisterModule(new BLLModule(Configuration.GetConnectionString("DefaultConnection")));
-            this.ApplicationContainer = builder.Build();
-
-            // Create the IServiceProvider based on the container.
-            return new AutofacServiceProvider(this.ApplicationContainer);
+            BLLConfig.ConfigureServices(services, Configuration["Data:DefaultConnection:ConnectionStrings"]);
+            services.AddAutomapper();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
