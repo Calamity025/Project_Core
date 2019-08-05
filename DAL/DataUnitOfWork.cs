@@ -57,7 +57,6 @@ namespace DAL
             if (disposing)
             {
                 _context.Dispose();
-                Debug.Print("Dispose called");
             }
 
             disposed = true;

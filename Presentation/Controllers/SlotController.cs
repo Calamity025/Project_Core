@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -9,7 +10,9 @@ using BLL.Interfaces;
 using Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.FileProviders;
 using Presentation.Models;
 
 namespace Presentation.Controllers
@@ -47,11 +50,40 @@ namespace Presentation.Controllers
 
         // POST: api/Slot
         [HttpPost]
-        public async void Post([FromBody] SlotCreationModel newSlot)
+        public async Task Post([FromBody] SlotCreationModel newSlot)
         {
             int slotId = await _slotManagement.CreateSlot(newSlot.UserId, _mapper.Map<SlotCreationDTO>(newSlot));
             Response.StatusCode = 200;
             await Response.WriteAsync(slotId.ToString());
+        }
+
+        // POST: api/Slot
+        [HttpPost]
+        [Route("image/{id}")]
+        public async Task Post(IFormFile file, int id)
+        {
+            try
+            {
+                if (!Directory.Exists(Directory.GetCurrentDirectory() + "\\wwwroot\\SlotImages\\"))
+                {
+                    Directory.CreateDirectory(Directory.GetCurrentDirectory() + "\\wwwroot\\SlotImages\\");
+                }
+                using (FileStream filestream = System.IO.File.Create(Directory.GetCurrentDirectory() + "\\wwwroot\\SlotImages\\" + $"{Path.GetFileNameWithoutExtension(file.FileName)}_{id}{Path.GetExtension(file.FileName)}"))
+                {
+                    file.CopyTo(filestream);
+                    filestream.Flush();
+                    await _slotManagement.AddImageLink(id,
+                        $"/SlotImages/{Path.GetFileNameWithoutExtension(file.FileName)}_{id}{Path.GetExtension(file.FileName)}");
+                }
+
+                Response.StatusCode = 200;
+                await Response.WriteAsync(id.ToString());
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+
         }
 
         // PUT: api/Slot/5

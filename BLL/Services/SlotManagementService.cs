@@ -26,27 +26,25 @@ namespace BLL.Services
 
         public async Task<int> CreateSlot(int userId, SlotCreationDTO slotDTO)
         {
-            /*UserInfo seller = await _db.UserInfos.GetAsync(userId);
+            UserInfo seller = await _db.UserInfos.GetAsync(userId);
             Category category = await _db.Categories.GetAsync(slotDTO.CategoryId);
             if (seller == null || category == null)
             {
                 throw new NotFoundException();
             }
 
-            List<Tag> tags = await _db.Tags.GetAll().Where(x => slotDTO.SlotTagsId.Contains(x.Id)).ToListAsync();
-            */
+            //List<Tag> tags = await _db.Tags.GetAll().Where(x => slotDTO.SlotTagsId.Contains(x.Id)).ToListAsync();
+            
             var newSlot = _mapper.Map<Slot>(slotDTO);
-            //newSlot.Category = category;
+            newSlot.Category = category;
             //newSlot.SlotTags = tags;
             _db.Slots.Create(newSlot);
-            //seller.PlacedSlots.Add(newSlot);
-            await _db.SaveChangesAsync();
+            seller.PlacedSlots.Add(newSlot);
 
-            return 0;
             try
             {
-                
-                //return newSlot.Id;
+                await _db.SaveChangesAsync();
+                return newSlot.Id;
             }
             catch (Exception e)
             {
@@ -70,6 +68,25 @@ namespace BLL.Services
             catch (Exception e)
             {
                 throw new DatabaseException("Error when deleting slot", e);
+            }
+        }
+
+        public async Task AddImageLink(int id, string link)
+        {
+            Slot slot = await _db.Slots.GetAsync(id);
+            if (slot == null)
+            {
+                throw new NotFoundException();
+            }
+            slot.ImageLink = link;
+
+            try
+            {
+                await _db.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                throw new DatabaseException("Error when adding image link", e);
             }
         }
 
