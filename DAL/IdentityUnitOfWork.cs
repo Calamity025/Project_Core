@@ -13,7 +13,7 @@ using Microsoft.Extensions.Logging;
 
 namespace DAL
 {
-    class IdentityUnitOfWork : IIdentityUnitOfWork
+    public class IdentityUnitOfWork : IIdentityUnitOfWork
     {
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<Role> _roleManager;

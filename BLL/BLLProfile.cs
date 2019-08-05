@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using AutoMapper;
+using BLL.DTO;
 using Entities;
 
 namespace BLL
@@ -12,6 +13,7 @@ namespace BLL
         {
             CreateMap<SlotCreationDTO, Slot>();
             CreateMap<Slot, SlotMinimumDTO>();
+            CreateMap<UserCreationDTO, User>();
         }
     }
 }

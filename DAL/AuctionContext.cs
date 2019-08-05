@@ -9,7 +9,7 @@ namespace DAL
 {
     public class AuctionContext : IdentityDbContext<User, Role, int>, IDbContext
     {
-        public AuctionContext(DbContextOptions<AuctionContext> options)
+        public AuctionContext(DbContextOptions options)
             : base(options) { }
 
         public DbSet<Slot> Slots { get; set; }
@@ -18,6 +18,14 @@ namespace DAL
         public DbSet<Category> Categories { get; set; }
 
         public Task<int> SaveChangesAsync() => base.SaveChangesAsync();
+
+        
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+            //builder.Entity<Slot>().HasData(
+               // new Slot() {Id = -1, Name = "Ancient Sword"});
+        }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

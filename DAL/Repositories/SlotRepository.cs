@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DAL.Interfaces;
@@ -10,8 +11,7 @@ namespace DAL.Repositories
 {
     public class SlotRepository : ISlotRepository
     {
-
-        private IDbContext _context;
+        private readonly IDbContext _context;
 
         public SlotRepository(IDbContext context)
         {
@@ -32,7 +32,7 @@ namespace DAL.Repositories
         {
             return await _context.Slots.FindAsync(id);
         }
-
+        
         public void Create(Slot item)
         {
             _context.Slots.Add(item);

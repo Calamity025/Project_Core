@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using DAL.Interfaces;
 using DAL.Repositories;
@@ -14,7 +15,6 @@ namespace DAL
         private IUserRepository _userInfoRepository;
         private ITagRepository _tagRepository;
         private ICategoryRepository _categoryRepository;
-        private ImageRepository _imageRepository;
 
         public DataUnitOfWork(IDbContext context)
         {
@@ -25,7 +25,7 @@ namespace DAL
         public IUserRepository UserInfos => _userInfoRepository ?? (_userInfoRepository = new UserInfoRepository(_context));
         public ITagRepository Tags => _tagRepository ?? (_tagRepository = new TagRepository(_context));
         public ICategoryRepository Categories => _categoryRepository ?? (_categoryRepository = new CategoryRepository(_context));
-        public ImageRepository ImageRepository => _imageRepository ?? (_imageRepository = new ImageRepository())
+
         public void Update(object item)
         {
             _context.Entry(item).State = EntityState.Modified;
@@ -57,6 +57,7 @@ namespace DAL
             if (disposing)
             {
                 _context.Dispose();
+                Debug.Print("Dispose called");
             }
 
             disposed = true;

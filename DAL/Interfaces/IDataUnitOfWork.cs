@@ -11,7 +11,6 @@ namespace DAL.Interfaces
         IUserRepository UserInfos { get; }
         ITagRepository Tags { get; }
         ICategoryRepository Categories { get; }
-        ImageRepository ImageRepository { get; }
 
         void Update(object item);
         void SaveChanges();
