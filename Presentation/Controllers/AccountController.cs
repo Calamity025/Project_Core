@@ -51,7 +51,7 @@ namespace Presentation.Controllers
                 issuer: AuthOptions.ISSUER,
                 audience: AuthOptions.AUDIENCE,
                 notBefore: now,
-                claims: identity.Claims,
+                claims: identity.ClaimsIdentity.Claims,
                 expires: now.Add(TimeSpan.FromMinutes(AuthOptions.LIFETIME)),
                 signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
             var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
@@ -59,7 +59,7 @@ namespace Presentation.Controllers
             var response = new
             {
                 access_token = encodedJwt,
-                username = identity.Name
+                username = identity.User
             };
             await Response.WriteAsync(JsonConvert.SerializeObject(response,
                 new JsonSerializerSettings {Formatting = Formatting.Indented}));

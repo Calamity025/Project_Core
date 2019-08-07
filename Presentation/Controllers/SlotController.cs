@@ -7,17 +7,14 @@ using AutoMapper;
 using BLL;
 using BLL.DTO;
 using BLL.Interfaces;
-using Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.FileProviders;
 using Presentation.Models;
 
 namespace Presentation.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class SlotController : ControllerBase
@@ -38,23 +35,62 @@ namespace Presentation.Controllers
         [Route("page/{id:int}")]
         public async Task<IEnumerable<SlotMinimumDTO>> Get(int id)
         {
-            return await _slotRepresentation.GetPage(id, 10);
+            if (id < 1)
+            {
+                Response.StatusCode = 400;
+                return null;
+            }
+
+            var slotPage = await _slotRepresentation.GetPage(id, 10);
+            if (!slotPage.Any())
+            {
+                Response.StatusCode = 404;
+                return null;
+            }
+
+            return slotPage;
         }
 
         // GET: api/Slot/5
         [HttpGet("{id:int}", Name = "GetSlot")]
         public async Task<SlotFullDTO> GetSlot(int id)
         {
-            return await _slotRepresentation.GetSlot(id);
+            if (id < 1)
+            {
+                Response.StatusCode = 400;
+                return null;
+            }
+
+            try
+            {
+                return await _slotRepresentation.GetSlot(id);
+            }
+            catch (NotFoundException)
+            {
+                Response.StatusCode = 404;
+            }
+            catch (Exception e)
+            {
+                Response.StatusCode = 500;
+                await Response.WriteAsync(e.Message);
+            }
+            return null;
         }
 
         // POST: api/Slot
         [HttpPost]
         public async Task Post([FromBody] SlotCreationModel newSlot)
         {
-            int slotId = await _slotManagement.CreateSlot(newSlot.UserId, _mapper.Map<SlotCreationDTO>(newSlot));
-            Response.StatusCode = 200;
-            await Response.WriteAsync(slotId.ToString());
+            try
+            {
+                int slotId = await _slotManagement.CreateSlot(newSlot.UserId, _mapper.Map<SlotCreationDTO>(newSlot));
+                Response.StatusCode = 200;
+                await Response.WriteAsync(slotId.ToString());
+            }
+            catch (Exception)
+            {
+                Response.StatusCode = 500;
+            }
         }
 
         // POST: api/Slot
@@ -68,7 +104,10 @@ namespace Presentation.Controllers
                 {
                     Directory.CreateDirectory(Directory.GetCurrentDirectory() + "\\wwwroot\\SlotImages\\");
                 }
-                using (FileStream filestream = System.IO.File.Create(Directory.GetCurrentDirectory() + "\\wwwroot\\SlotImages\\" + $"{Path.GetFileNameWithoutExtension(file.FileName)}_{id}{Path.GetExtension(file.FileName)}"))
+
+                using (FileStream filestream = System.IO.File.Create(
+                    Directory.GetCurrentDirectory() + "\\wwwroot\\SlotImages\\" +
+                    $"{Path.GetFileNameWithoutExtension(file.FileName)}_{id}{Path.GetExtension(file.FileName)}"))
                 {
                     file.CopyTo(filestream);
                     filestream.Flush();
@@ -79,9 +118,13 @@ namespace Presentation.Controllers
                 Response.StatusCode = 200;
                 await Response.WriteAsync(id.ToString());
             }
-            catch (Exception e)
+            catch (NotFoundException)
             {
-                throw e;
+                Response.StatusCode = 404;
+            }
+            catch (Exception)
+            {
+                Response.StatusCode = 500;
             }
 
         }

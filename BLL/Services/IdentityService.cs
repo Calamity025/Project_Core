@@ -32,13 +32,20 @@ namespace BLL.Services
                 new Claim(ClaimsIdentity.DefaultNameClaimType, user.UserName));
         }
 
-        public async Task<ClaimsIdentity> Login(UserLoginInfo loginInfo, string authType)
+        public async Task<UserLoginDTO> Login(UserLoginInfo loginInfo, string authType)
         {
             User user = await _identity.UserManager.FindByNameAsync(loginInfo.Login);
             if (user != null && await _identity.UserManager.CheckPasswordAsync(user, loginInfo.Password))
             {
                 var claims = await _identity.UserManager.GetClaimsAsync(user);
-                return new ClaimsIdentity(claims, authType);
+
+                UserLoginDTO response = new UserLoginDTO
+                {
+                    ClaimsIdentity = new ClaimsIdentity(claims, authType),
+                    User = _mapper.Map<UserLoginDTO.UserDTO>(user)
+                };
+                response.User.AvatarLink = user.UserInfo?.ImageLink;
+                return response;
             }
             return null;
             

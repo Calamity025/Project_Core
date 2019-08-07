@@ -35,7 +35,6 @@ namespace BLL.Services
                 page.Add(_mapper.Map<SlotMinimumDTO>(slot));
             }
 
-            await _db.SaveChangesAsync();
             return page;
         }
 

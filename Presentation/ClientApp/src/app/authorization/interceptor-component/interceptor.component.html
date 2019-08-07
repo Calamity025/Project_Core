@@ -1,0 +1,7 @@
+<div>
+  <label>Введите логин</label><br />
+  <input type="text" id="login" [(ngModel)]="user.login"/> <br /><br />
+  <label>Введите пароль</label><br />
+  <input type="password" id="password" [(ngModel)]="user.password"/><br /><br />
+  <input type="submit" id="submit" value="Логин" (click)="logIn()"/>
+</div>

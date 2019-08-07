@@ -12,13 +12,19 @@
             <a class="nav-link text-dark" [routerLink]='["/"]'>Home</a>
           </li>
           <li class="nav-item" [routerLinkActive]='["link-active"]'>
-            <a class="nav-link text-dark" [routerLink]='["/counter"]'>Counter</a>
-          </li>
-          <li class="nav-item" [routerLinkActive]='["link-active"]'>
-            <a class="nav-link text-dark" [routerLink]='["/fetch-data"]'>Fetch data</a>
+            <button class="btn btn-default active" type="button" (click)="toggleLoginForm()">Log In</button>
           </li>
         </ul>
       </div>
     </div>
-  </nav>
+  </nav> 
 </header>
+<div style="width: 500px;" class="mx-auto">
+  <form  class="form-horizontal border mt-5 p-3 d-flex flex-column justify-content-center" *ngIf="isLoginShown">
+    <label for="inputLogin3" class="control-label">Введите логин</label>
+    <input name="Login" type="text" class="form-control" id="login" placeholder="Login" [(ngModel)]="user.login"/> <br>
+    <label for="inputPassword3" class="control-label">Введите пароль</label>
+    <input name="Password" type="password" class="form-control" id="password" placeholder="Password" [(ngModel)]="user.password"/><br>
+    <button type="submit" class="btn btn-success align-self-end" (click)="logIn()">Sign in</button>
+  </form>
+</div>

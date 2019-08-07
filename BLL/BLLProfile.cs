@@ -13,7 +13,9 @@ namespace BLL
         {
             CreateMap<SlotCreationDTO, Slot>();
             CreateMap<Slot, SlotMinimumDTO>();
+            CreateMap<Slot, SlotFullDTO>();
             CreateMap<UserCreationDTO, User>();
+            CreateMap<User, UserLoginDTO.UserDTO>();
         }
     }
 }
