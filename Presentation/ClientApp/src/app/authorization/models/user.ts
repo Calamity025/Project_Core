@@ -1,5 +1,6 @@
-export interface User {
-    id: string;
-    userName: string;
-    avatarLink: string;
+export class User {
+    Id: string;
+    Name: string;
+    AvatarLink: string;
+    IsAuthorized : boolean;
 }

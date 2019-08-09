@@ -19,6 +19,25 @@ namespace DAL.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+            modelBuilder.Entity("Entities.BetHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<decimal>("Price");
+
+                    b.Property<int?>("SlotId");
+
+                    b.Property<int>("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SlotId");
+
+                    b.ToTable("BetHistories");
+                });
+
             modelBuilder.Entity("Entities.Category", b =>
                 {
                     b.Property<int>("Id")
@@ -75,8 +94,6 @@ namespace DAL.Migrations
 
                     b.Property<string>("Name");
 
-                    b.Property<decimal>("Price");
-
                     b.Property<string>("Status");
 
                     b.Property<int>("UserId");
@@ -85,6 +102,8 @@ namespace DAL.Migrations
 
                     b.Property<int?>("UserInfoId1");
 
+                    b.Property<int?>("UserInfoId2");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
@@ -92,6 +111,8 @@ namespace DAL.Migrations
                     b.HasIndex("UserInfoId");
 
                     b.HasIndex("UserInfoId1");
+
+                    b.HasIndex("UserInfoId2");
 
                     b.ToTable("Slots");
                 });
@@ -161,6 +182,10 @@ namespace DAL.Migrations
                         .IsUnique()
                         .HasName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.HasIndex("UserName")
+                        .IsUnique()
+                        .HasFilter("[UserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers");
                 });
@@ -267,6 +292,13 @@ namespace DAL.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
+            modelBuilder.Entity("Entities.BetHistory", b =>
+                {
+                    b.HasOne("Entities.Slot", "Slot")
+                        .WithMany()
+                        .HasForeignKey("SlotId");
+                });
+
             modelBuilder.Entity("Entities.Slot", b =>
                 {
                     b.HasOne("Entities.Category", "Category")
@@ -275,12 +307,16 @@ namespace DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Entities.UserInfo")
-                        .WithMany("FollowingSlots")
+                        .WithMany("BetSlots")
                         .HasForeignKey("UserInfoId");
 
                     b.HasOne("Entities.UserInfo")
-                        .WithMany("PlacedSlots")
+                        .WithMany("FollowingSlots")
                         .HasForeignKey("UserInfoId1");
+
+                    b.HasOne("Entities.UserInfo")
+                        .WithMany("PlacedSlots")
+                        .HasForeignKey("UserInfoId2");
                 });
 
             modelBuilder.Entity("Entities.Tag", b =>

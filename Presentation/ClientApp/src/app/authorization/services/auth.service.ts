@@ -5,29 +5,35 @@ import { User } from '../models/user';
 import { LoginModel } from '../models/login-model';
 import { JwtService } from '../services/jwt.service';
 import { HttpClient } from '@angular/common/http';
-import { UserResponse } from '../models/userResponse';
+import { UserLoginResponse } from '../models/userLoginResponse';
+import { routerNgProbeToken } from '@angular/router/src/router_module';
+import { Router } from '@angular/router';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class AuthService {
-  private currentUser$ = new BehaviorSubject<User>(null);
+  private currentUser = null;
+
   constructor(private httpClient: HttpClient,
     private jwtService: JwtService) { }
 
-    public isSignedIn(): Observable<boolean> {
-      return this.currentUser$.pipe(
-        map(currentUser => !!currentUser)
-      );
+    public isSignedIn(): boolean {
+      if(!!this.currentUser){
+        return this.currentUser.isAuthorized;
+      }
+      let isAuthorized : boolean;
+      this.getCurrentUser().subscribe(val => {
+        isAuthorized = val.IsAuthorized;
+        return isAuthorized;
+      },
+      catchError => (error => false));
     }
   
     public signIn(loginModel: LoginModel): Observable<User> {
       const PATH = 'https://localhost:44324/Token';
-      return this.httpClient.post<UserResponse>(PATH, loginModel)
+      return this.httpClient.post<UserLoginResponse>(PATH, loginModel)
       .pipe(
-        tap(({user, access_token}) => {
+        tap(({access_token}) => {
           this.jwtService.persistToken(access_token);
-          this.currentUser$.next(user as User);
         }),
         catchError(error => {
           alert(error);
@@ -40,13 +46,21 @@ export class AuthService {
       return of(null).pipe(
         delay(1500),
         tap(() => {
-          this.currentUser$.next(null);
+          this.currentUser = null;
           this.jwtService.clearToken();
         })
       );
     }
   
     public getCurrentUser(): Observable<User> {
-      return this.currentUser$.asObservable();
+      if(!!this.currentUser){
+        console.log(this.currentUser);
+        return new Observable(this.currentUser);
+      }
+
+      return this.httpClient.get<User>('https://localhost:44324/Account/Current')
+      .pipe(tap(x => {
+        this.currentUser = x;
+      }));
     }
 }

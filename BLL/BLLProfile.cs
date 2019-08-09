@@ -11,11 +11,11 @@ namespace BLL
     {
         public BLLProfile()
         {
-            CreateMap<SlotCreationDTO, Slot>();
+            CreateMap<SlotCreationDTO, Slot>().ForMember(src => src.Id, opt => opt.Ignore());
             CreateMap<Slot, SlotMinimumDTO>();
             CreateMap<Slot, SlotFullDTO>();
-            CreateMap<UserCreationDTO, User>();
-            CreateMap<User, UserLoginDTO.UserDTO>();
+            CreateMap<UserCreationDTO, User>().ForMember(src => src.Id, opt => opt.Ignore());
+            CreateMap<User, UserLoginResponse.UserDTO>();
         }
     }
 }

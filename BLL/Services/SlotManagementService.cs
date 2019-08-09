@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
@@ -33,11 +34,11 @@ namespace BLL.Services
                 throw new NotFoundException();
             }
 
-            //List<Tag> tags = await _db.Tags.GetAll().Where(x => slotDTO.SlotTagsId.Contains(x.Id)).ToListAsync();
-            
+            List<Tag> tags = await _db.Tags.GetAll().Where(x => slotDTO.SlotTagsId.Contains(x.Id)).ToListAsync();
             var newSlot = _mapper.Map<Slot>(slotDTO);
             newSlot.Category = category;
-            //newSlot.SlotTags = tags;
+            newSlot.SlotTags = tags;
+            _db.BetHistories.Create(new BetHistory() { Slot = newSlot, UserId = seller.Id, Price = slotDTO.Price });
             _db.Slots.Create(newSlot);
             seller.PlacedSlots.Add(newSlot);
 
@@ -52,15 +53,23 @@ namespace BLL.Services
             }
         }
 
-        public async Task DeleteSlot(int id)
+        public async Task DeleteSlot(int slotId, int userId)
         {
-            Slot slot = await _db.Slots.GetAsync(id);
-            if (slot == null)
+            Slot slot = await _db.Slots.GetAsync(slotId);
+            var user = await _db.UserInfos.GetAsync(userId);
+            List<BetHistory> histories = await _db.BetHistories.GetAll().Where(x => x.Slot.Id == slotId).ToListAsync();
+            if (slot == null || user == null)
             {
                 throw new NotFoundException();
             }
 
             _db.Slots.Delete(slot);
+            user.PlacedSlots.Remove(slot);
+            foreach (var betHistory in histories)
+            {
+                _db.BetHistories.Delete(betHistory);
+            }
+
             try
             {
                 await _db.SaveChangesAsync();
@@ -178,7 +187,7 @@ namespace BLL.Services
             }
         }
 
-        public async Task AddToUsersFollowingList(int userId, int slotId)
+        public async Task AddToUserFollowingList(int userId, int slotId)
         {
             UserInfo user = await _db.UserInfos.GetAsync(userId);
             Slot slot = await _db.Slots.GetAsync(slotId);
@@ -196,7 +205,78 @@ namespace BLL.Services
             }
             catch (Exception e)
             {
-                throw new DatabaseException("Error when updating", e);
+                throw new DatabaseException("Error when adding to following list", e);
+            }
+        }
+
+        public async Task RemoveFromUserFollowingList(int userId, int slotId)
+        {
+            UserInfo user = await _db.UserInfos.GetAsync(userId);
+            Slot slot = await _db.Slots.GetAsync(slotId);
+            if (user == null || slot == null)
+            {
+                throw new NotFoundException();
+            }
+
+            user.FollowingSlots.Remove(slot);
+
+            _db.Update(user);
+            try
+            {
+                await _db.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                throw new DatabaseException("Error when removing from following list", e);
+            }
+        }
+
+        public async Task MakeBet(int slotId, int userId, decimal bet)
+        {
+            var slot = await _db.Slots.GetAsync(slotId);
+            var user = await _db.UserInfos.GetAsync(userId);
+            if (slot == null || user == null)
+            {
+                throw new NotFoundException();
+            }
+
+            var maxSlotBet = await _db.BetHistories.GetAll().Where(x => x.Slot.Id == slotId).MaxAsync(x => x.Price);
+            if (bet < maxSlotBet || bet - slot.MinBet < maxSlotBet)
+            {
+                throw new ArgumentException("Bet cannot be lower than actual price");
+            }
+
+            user.BetSlots.Add(slot);
+            _db.BetHistories.Create(new BetHistory(){Price = bet, Slot = slot, UserId = userId});
+            try
+            {
+                await _db.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                throw new DatabaseException("Error when making a bet", e);
+            }
+        }
+
+        public async Task UndoBet(int slotId, int userId)
+        {
+            var bet = await _db.BetHistories.GetAll().FirstOrDefaultAsync(x => x.Slot.Id == slotId && x.UserId == userId);
+            var user = await _db.UserInfos.GetAsync(userId);
+            if (bet == null || user == null)
+            {
+                throw new NotFoundException();
+            }
+
+            user.BetSlots.Remove(bet.Slot);
+            _db.BetHistories.Delete(bet);
+
+            try
+            {
+                await _db.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                throw new DatabaseException("Error when deleting bet");
             }
         }
 

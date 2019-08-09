@@ -26,12 +26,11 @@ namespace Presentation
         {
             Configuration = configuration;
         }
-        public IContainer ApplicationContainer { get; private set; }
 
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public IServiceProvider ConfigureServices(IServiceCollection services)
+        public void ConfigureServices(IServiceCollection services)
         {
             // In production, the Angular files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
@@ -39,9 +38,11 @@ namespace Presentation
                 configuration.RootPath = "ClientApp/dist";
             });
 
-            //services.AddScoped<ISlotManagementService, SlotManagementService>();
-            //services.AddScoped<ISlotRepresentationService, SlotRepresentationService>();
-            //services.AddScoped<IIdentityService, IdentityService>();
+            services.AddScoped<ISlotManagementService, SlotManagementService>();
+            services.AddScoped<ISlotRepresentationService, SlotRepresentationService>();
+            services.AddScoped<ICategoryManagementService, CategoryManagementService>();
+            services.AddScoped<ITagManagementService, TagManagementService>();
+            services.AddScoped<IIdentityService, IdentityService>();
             BLLModule.ConfigureServices(services, Configuration.GetConnectionString("DefaultConnection"));
 
             var mappingConfig = new MapperConfiguration(mc =>
@@ -72,18 +73,6 @@ namespace Presentation
             services.AddMvcCore().SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
                 .AddAuthorization()
                 .AddJsonFormatters();
-
-            var builder = new ContainerBuilder();
-
-            builder.Populate(services);
-            builder.RegisterType<SlotManagementService>().As<ISlotManagementService>();
-            builder.RegisterType<SlotRepresentationService>().As<ISlotRepresentationService>();
-            builder.RegisterType<IdentityService>().As<IIdentityService>();
-            builder.RegisterModule(new BLLModule(Configuration.GetConnectionString("DefaultConnection")));
-            this.ApplicationContainer = builder.Build();
-
-            // Create the IServiceProvider based on the container.
-            return new AutofacServiceProvider(this.ApplicationContainer);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

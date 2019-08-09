@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { AuthService, ReqResService } from '../authorization/services';
-import { LoginModel } from '../authorization/models';
+import { LoginModel, User } from '../authorization/models';
+import { map, tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-nav-menu',
@@ -9,12 +11,20 @@ import { LoginModel } from '../authorization/models';
 })
 export class NavMenuComponent {
   isExpanded = false;
-  isLoginShown = false;
+  isAuthorized : boolean;
+  currentUser : User;
+  userAvatar = "/UserAvatars/defaultUser.png";
+  userName;
   user: LoginModel = new LoginModel();
 
-  constructor(private authService: AuthService, private reqResService: ReqResService) { }
+  constructor(private authService: AuthService, 
+    private reqResService: ReqResService,
+    private cdRef: ChangeDetectorRef) {
+      this.setUser()
+   }
 
   ngOnInit() {
+    
   }
 
 
@@ -27,18 +37,33 @@ export class NavMenuComponent {
   }
 
   toggleLoginForm() {
-    this.isLoginShown = !this.isLoginShown;
     this.user.login = null;
     this.user.password = null;
   }
 
   logIn() {
-    if(this.authService.signIn(this.user).subscribe(console.log) != null){
-      this.toggleLoginForm();
-    }
+    this.authService.signIn(this.user).subscribe(val => {
+      this.setUser();
+    });
+  }
+
+  logOut() {
+    this.authService.signOut().subscribe(() => this.isAuthorized = false);
+    
   }
 
   sendSomeRequests() {
     this.reqResService.getUser(1).subscribe(console.log);
+  }
+
+  setUser() {
+    this.authService.getCurrentUser()
+    .subscribe(
+      (val : User) => {
+        this.isAuthorized = true;
+        this.currentUser = val;
+        this.cdRef.detectChanges();
+      }
+    );
   }
 }

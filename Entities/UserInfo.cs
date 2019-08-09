@@ -18,6 +18,7 @@ namespace Entities
         public decimal Balance { get; set; }
         public string ImageLink { get; set; }
         public virtual ICollection<Slot> FollowingSlots { get; set; }
+        public virtual ICollection<Slot> BetSlots { get; set; }
         public virtual ICollection<Slot> PlacedSlots { get; set; }
 
         public UserInfo()

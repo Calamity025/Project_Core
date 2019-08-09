@@ -15,5 +15,6 @@ namespace DAL.Interfaces
         DbSet<UserInfo> UserInfos { get; set; }
         DbSet<Category> Categories { get; set; }
         DbSet<Tag> Tags { get; set; }
+        DbSet<BetHistory> BetHistories { get; set; }
     }
 }

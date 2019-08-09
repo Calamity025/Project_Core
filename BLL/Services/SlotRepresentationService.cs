@@ -40,13 +40,22 @@ namespace BLL.Services
 
         public async Task<SlotFullDTO> GetSlot(int id)
         {
-            Slot slot = await _db.Slots.GetAsync(id);
+            Slot slot = await _db.Slots.GetAll().Where(x => x.Id == id)
+                .Include(x => x.SlotTags)
+                .Include(x=> x.Category)
+                .FirstOrDefaultAsync();
+
             if (slot == null)
             {
                 throw new NotFoundException();
             }
 
-            return _mapper.Map<SlotFullDTO>(slot);
+            decimal price = await _db.BetHistories.GetAll()
+                .Where(x => x.Slot.Id == id)
+                .MaxAsync(x => x.Price);
+            var slotDTO = _mapper.Map<SlotFullDTO>(slot);
+            slotDTO.Price = price;
+            return slotDTO;
         }
 
         public async Task<IEnumerable<SlotMinimumDTO>> GetByCategory(int categoryId, 

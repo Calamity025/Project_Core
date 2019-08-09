@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using BLL.DTO;
 using BLL.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using Presentation.Models;
 
 namespace Presentation.Controllers
 {
@@ -19,10 +21,12 @@ namespace Presentation.Controllers
     public class AccountController : ControllerBase
     {
         private readonly IIdentityService _identityService;
+        private readonly IMapper _mapper;
 
-        public AccountController(IIdentityService identityService)
+        public AccountController(IIdentityService identityService, IMapper mapper)
         {
             _identityService = identityService;
+            _mapper = mapper;
         }
 
         [HttpPost]
@@ -51,7 +55,7 @@ namespace Presentation.Controllers
                 issuer: AuthOptions.ISSUER,
                 audience: AuthOptions.AUDIENCE,
                 notBefore: now,
-                claims: identity.ClaimsIdentity.Claims,
+                claims: identity.Claims,
                 expires: now.Add(TimeSpan.FromMinutes(AuthOptions.LIFETIME)),
                 signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
             var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
@@ -59,8 +63,26 @@ namespace Presentation.Controllers
             var response = new
             {
                 access_token = encodedJwt,
-                username = identity.User
+                claims = User.FindFirst("Id")
             };
+            await Response.WriteAsync(JsonConvert.SerializeObject(response,
+                new JsonSerializerSettings {Formatting = Formatting.Indented}));
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("Current")]
+        public async Task GetCurrentUser()
+        {
+            if (!User.Identity.IsAuthenticated)
+            {
+                Response.StatusCode = 401;
+                return;
+            }
+
+            CurrentUserModel response = _mapper.Map<CurrentUserModel>(await _identityService.GetCurrentUser(User.Identity.Name));
+            response.isAuthorized = User.Identity.IsAuthenticated;
+
             await Response.WriteAsync(JsonConvert.SerializeObject(response,
                 new JsonSerializerSettings {Formatting = Formatting.Indented}));
         }

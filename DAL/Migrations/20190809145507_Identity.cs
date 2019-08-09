@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace DAL.Migrations
 {
-    public partial class InitialCreate : Migration
+    public partial class Identity : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -198,7 +198,6 @@ namespace DAL.Migrations
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(nullable: true),
                     UserId = table.Column<int>(nullable: false),
-                    Price = table.Column<decimal>(nullable: false),
                     MinBet = table.Column<decimal>(nullable: false),
                     EndTime = table.Column<DateTime>(nullable: false),
                     Status = table.Column<string>(nullable: true),
@@ -206,7 +205,8 @@ namespace DAL.Migrations
                     Description = table.Column<string>(nullable: true),
                     ImageLink = table.Column<string>(nullable: true),
                     UserInfoId = table.Column<int>(nullable: true),
-                    UserInfoId1 = table.Column<int>(nullable: true)
+                    UserInfoId1 = table.Column<int>(nullable: true),
+                    UserInfoId2 = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -227,6 +227,33 @@ namespace DAL.Migrations
                         name: "FK_Slots_UserInfos_UserInfoId1",
                         column: x => x.UserInfoId1,
                         principalTable: "UserInfos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Slots_UserInfos_UserInfoId2",
+                        column: x => x.UserInfoId2,
+                        principalTable: "UserInfos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BetHistories",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    SlotId = table.Column<int>(nullable: true),
+                    UserId = table.Column<int>(nullable: false),
+                    Price = table.Column<decimal>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BetHistories", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_BetHistories_Slots_SlotId",
+                        column: x => x.SlotId,
+                        principalTable: "Slots",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -291,6 +318,18 @@ namespace DAL.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AspNetUsers_UserName",
+                table: "AspNetUsers",
+                column: "UserName",
+                unique: true,
+                filter: "[UserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BetHistories_SlotId",
+                table: "BetHistories",
+                column: "SlotId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Slots_CategoryId",
                 table: "Slots",
                 column: "CategoryId");
@@ -304,6 +343,11 @@ namespace DAL.Migrations
                 name: "IX_Slots_UserInfoId1",
                 table: "Slots",
                 column: "UserInfoId1");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Slots_UserInfoId2",
+                table: "Slots",
+                column: "UserInfoId2");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tags_SlotId",
@@ -327,6 +371,9 @@ namespace DAL.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
+
+            migrationBuilder.DropTable(
+                name: "BetHistories");
 
             migrationBuilder.DropTable(
                 name: "Tags");

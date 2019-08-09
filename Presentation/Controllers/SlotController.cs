@@ -14,19 +14,18 @@ using Presentation.Models;
 
 namespace Presentation.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class SlotController : ControllerBase
     {
-        private readonly ISlotRepresentationService _slotRepresentation;
-        private readonly ISlotManagementService _slotManagement;
+        private readonly ISlotRepresentationService _slotRepresentationService;
+        private readonly ISlotManagementService _slotManagementService;
         private readonly IMapper _mapper;
 
-        public SlotController(ISlotRepresentationService slotRepresentation, ISlotManagementService slotManagement, IMapper mapper)
+        public SlotController(ISlotRepresentationService slotRepresentationService, ISlotManagementService slotManagementService, IMapper mapper)
         {
-            _slotRepresentation = slotRepresentation;
-            _slotManagement = slotManagement;
+            _slotRepresentationService = slotRepresentationService;
+            _slotManagementService = slotManagementService;
             _mapper = mapper;
         }
 
@@ -41,7 +40,7 @@ namespace Presentation.Controllers
                 return null;
             }
 
-            var slotPage = await _slotRepresentation.GetPage(id, 10);
+            var slotPage = await _slotRepresentationService.GetPage(id, 10);
             if (!slotPage.Any())
             {
                 Response.StatusCode = 404;
@@ -63,7 +62,7 @@ namespace Presentation.Controllers
 
             try
             {
-                return await _slotRepresentation.GetSlot(id);
+                return await _slotRepresentationService.GetSlot(id);
             }
             catch (NotFoundException)
             {
@@ -78,12 +77,14 @@ namespace Presentation.Controllers
         }
 
         // POST: api/Slot
+        [Authorize]
         [HttpPost]
         public async Task Post([FromBody] SlotCreationModel newSlot)
         {
+            var id = Convert.ToInt32(User.Claims.First(x => x.Type == "Id").Value);
             try
             {
-                int slotId = await _slotManagement.CreateSlot(newSlot.UserId, _mapper.Map<SlotCreationDTO>(newSlot));
+                int slotId = await _slotManagementService.CreateSlot(id, _mapper.Map<SlotCreationDTO>(newSlot));
                 Response.StatusCode = 200;
                 await Response.WriteAsync(slotId.ToString());
             }
@@ -94,6 +95,7 @@ namespace Presentation.Controllers
         }
 
         // POST: api/Slot
+        [Authorize]
         [HttpPost]
         [Route("image/{id}")]
         public async Task Post(IFormFile file, int id)
@@ -111,7 +113,7 @@ namespace Presentation.Controllers
                 {
                     file.CopyTo(filestream);
                     filestream.Flush();
-                    await _slotManagement.AddImageLink(id,
+                    await _slotManagementService.AddImageLink(id,
                         $"/SlotImages/{Path.GetFileNameWithoutExtension(file.FileName)}_{id}{Path.GetExtension(file.FileName)}");
                 }
 
@@ -130,16 +132,18 @@ namespace Presentation.Controllers
         }
 
         // PUT: api/Slot/5
+        [Authorize]
         [HttpPut("{id}")]
         public void Put(int id, [FromBody] string value)
         {
         }
 
         // DELETE: api/ApiWithActions/5
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task Delete(int id)
         {
-            await _slotManagement.DeleteSlot(id);
+            await _slotManagementService.DeleteSlot(id, Convert.ToInt32(User.FindFirst("Id").Value));
         }
     }
 }

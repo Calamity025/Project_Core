@@ -13,6 +13,10 @@ namespace Presentation
         public PLProfile()
         {
             CreateMap<SlotCreationModel, SlotCreationDTO>();
+            CreateMap<UserLoginResponse, CurrentUserModel>()
+                .ForMember(src => src.Id, opt => opt.MapFrom(x => x.User.Id))
+                .ForMember(src => src.Name, opt => opt.MapFrom(x => x.User.UserName))
+                .ForMember(src => src.AvatarLink, opt => opt.MapFrom(x => x.User.AvatarLink));
         }
     }
 }

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Repositories
 {
-    public class UserInfoRepository : IUserRepository
+    public class UserInfoRepository : IUserInfoRepository
     {
         private IDbContext _context;
 

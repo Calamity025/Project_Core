@@ -12,19 +12,26 @@ namespace DAL
     {
         private IDbContext _context;
         private ISlotRepository _slotRepository;
-        private IUserRepository _userInfoRepository;
+        private IUserInfoRepository _userInfoRepository;
         private ITagRepository _tagRepository;
         private ICategoryRepository _categoryRepository;
+        private IBetHistoryRepository _betHistoryRepository;
 
         public DataUnitOfWork(IDbContext context)
         {
             _context = context;
         }
 
-        public ISlotRepository Slots => _slotRepository ?? (_slotRepository = new SlotRepository(_context));
-        public IUserRepository UserInfos => _userInfoRepository ?? (_userInfoRepository = new UserInfoRepository(_context));
-        public ITagRepository Tags => _tagRepository ?? (_tagRepository = new TagRepository(_context));
-        public ICategoryRepository Categories => _categoryRepository ?? (_categoryRepository = new CategoryRepository(_context));
+        public ISlotRepository Slots => 
+            _slotRepository ?? (_slotRepository = new SlotRepository(_context));
+        public IUserInfoRepository UserInfos =>
+            _userInfoRepository ?? (_userInfoRepository = new UserInfoRepository(_context));
+        public ITagRepository Tags => 
+            _tagRepository ?? (_tagRepository = new TagRepository(_context));
+        public ICategoryRepository Categories => 
+            _categoryRepository ?? (_categoryRepository = new CategoryRepository(_context));
+        public IBetHistoryRepository BetHistories =>
+            _betHistoryRepository ?? (_betHistoryRepository = new BetHistoryRepository(_context));
 
         public void Update(object item)
         {

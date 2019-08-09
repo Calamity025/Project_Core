@@ -8,9 +8,10 @@ using Entities;
 
 namespace BLL.Interfaces
 {
-    public interface IIdentityService
+    public interface IIdentityService : IDisposable
     {
         Task Register(UserCreationDTO user);
-        Task<UserLoginDTO> Login(UserLoginInfo info, string authType);
+        Task<ClaimsIdentity> Login(UserLoginInfo info, string authType);
+        Task<UserLoginResponse> GetCurrentUser(string name);
     }
 }
