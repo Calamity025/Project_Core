@@ -42,6 +42,7 @@ namespace Presentation
             services.AddScoped<ISlotRepresentationService, SlotRepresentationService>();
             services.AddScoped<ICategoryManagementService, CategoryManagementService>();
             services.AddScoped<ITagManagementService, TagManagementService>();
+            services.AddScoped<IProfileManagementService, ProfileManagementService>();
             services.AddScoped<IIdentityService, IdentityService>();
             BLLModule.ConfigureServices(services, Configuration.GetConnectionString("DefaultConnection"));
 

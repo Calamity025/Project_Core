@@ -53,7 +53,7 @@ namespace BLL.Services
             }
         }
 
-        public async Task DeleteSlot(int slotId, int userId)
+        public async Task<string> DeleteSlot(int slotId, int userId)
         {
             Slot slot = await _db.Slots.GetAsync(slotId);
             var user = await _db.UserInfos.GetAsync(userId);
@@ -73,6 +73,7 @@ namespace BLL.Services
             try
             {
                 await _db.SaveChangesAsync();
+                return slot.ImageLink;
             }
             catch (Exception e)
             {

@@ -183,10 +183,6 @@ namespace DAL.Migrations
                         .HasName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
-                    b.HasIndex("UserName")
-                        .IsUnique()
-                        .HasFilter("[UserName] IS NOT NULL");
-
                     b.ToTable("AspNetUsers");
                 });
 

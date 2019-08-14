@@ -14,8 +14,9 @@ namespace BLL
             CreateMap<SlotCreationDTO, Slot>().ForMember(src => src.Id, opt => opt.Ignore());
             CreateMap<Slot, SlotMinimumDTO>();
             CreateMap<Slot, SlotFullDTO>();
-            CreateMap<UserCreationDTO, User>().ForMember(src => src.Id, opt => opt.Ignore());
-            CreateMap<User, UserLoginResponse.UserDTO>();
+            CreateMap<IdentityCreationDTO, User>().ForMember(src => src.Id, opt => opt.Ignore());
+            CreateMap<User, UserDTO>();
+            CreateMap<ProfileCreationDTO, UserInfo>();
         }
     }
 }

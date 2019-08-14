@@ -10,8 +10,8 @@ namespace BLL.Interfaces
 {
     public interface IIdentityService : IDisposable
     {
-        Task Register(UserCreationDTO user);
-        Task<ClaimsIdentity> Login(UserLoginInfo info, string authType);
-        Task<UserLoginResponse> GetCurrentUser(string name);
+        Task<UserDTO> Register(IdentityCreationDTO identity);
+        Task<ClaimsIdentity> Login(LoginInfo info, string authType);
+        Task<LoginResponse> GetCurrentUser(string name);
     }
 }

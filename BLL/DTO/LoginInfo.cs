@@ -4,7 +4,7 @@ using System.Text;
 
 namespace BLL.DTO
 {
-    public class UserLoginInfo
+    public class LoginInfo
     {
         public string Login { get; set; }
         public string  Password { get; set; }

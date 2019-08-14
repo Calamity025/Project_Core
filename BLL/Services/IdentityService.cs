@@ -9,7 +9,6 @@ using BLL.Interfaces;
 using DAL.Interfaces;
 using Entities;
 using Microsoft.AspNetCore.Identity;
-using UserLoginInfo = BLL.DTO.UserLoginInfo;
 
 namespace BLL.Services
 {
@@ -26,27 +25,33 @@ namespace BLL.Services
             _mapper = mapper;
         }
 
-        public async Task Register(UserCreationDTO userCreation)
+        public async Task<UserDTO> Register(IdentityCreationDTO identityCreation)
         {
-            User user = _mapper.Map<User>(userCreation);
+            if (await _identity.UserManager.FindByNameAsync(identityCreation.UserName) != null)
+            {
+                throw new DatabaseException();
+            }
+
+            User user = _mapper.Map<User>(identityCreation);
             UserInfo info = new UserInfo(){User = user, Id = user.Id};
             _db.UserInfos.Create(info);
             user.UserInfo = info;
             try
             {
-                await _identity.UserManager.CreateAsync(user, userCreation.Password);
+                await _identity.UserManager.CreateAsync(user, identityCreation.Password);
                 await _identity.UserManager.AddClaimAsync(user, new Claim(ClaimsIdentity.DefaultNameClaimType, user.UserName));
                 await _identity.UserManager.AddClaimAsync(user, new Claim("Id", user.Id.ToString()));
+                return _mapper.Map<UserDTO>(user);
             }
             catch (Exception e)
             {
                 _db.UserInfos.Delete(info);
                 await _db.SaveChangesAsync();
-                throw new DatabaseException("Error when creating user", e);
+                throw new DatabaseException("Error when creating identity", e);
             }
         }
 
-        public async Task<ClaimsIdentity> Login(UserLoginInfo loginInfo, string authType)
+        public async Task<ClaimsIdentity> Login(LoginInfo loginInfo, string authType)
         {
             User user = await _identity.UserManager.FindByNameAsync(loginInfo.Login);
             if (user != null && await _identity.UserManager.CheckPasswordAsync(user, loginInfo.Password))
@@ -58,17 +63,17 @@ namespace BLL.Services
             return null;
         }
 
-        public async Task<UserLoginResponse> GetCurrentUser(string name)
+        public async Task<LoginResponse> GetCurrentUser(string name)
         {
             User user = await _identity.UserManager.FindByNameAsync(name);
-            UserLoginResponse userInfo = new UserLoginResponse()
+            LoginResponse res = new LoginResponse()
             {
                 ClaimsIdentity = new ClaimsIdentity(await _identity.UserManager.GetClaimsAsync(user), "Token"),
-                User = _mapper.Map<UserLoginResponse.UserDTO>(user)
+                User = _mapper.Map<UserDTO>(user)
             };
             UserInfo info = await _db.UserInfos.GetAsync(user.Id);
-            userInfo.User.AvatarLink = info.ImageLink;
-            return userInfo;
+            res.User.AvatarLink = info.ImageLink;
+            return res;
         }
 
         bool disposed = false;

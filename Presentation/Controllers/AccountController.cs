@@ -32,17 +32,27 @@ namespace Presentation.Controllers
         [HttpPost]
         [Route("/Register")]
         [AllowAnonymous]
-        public async Task Register([FromBody] UserCreationDTO userInfo)
+        public async Task Register([FromBody] UserRegistrationModel userInfo)
         {
-            await _identityService.Register(userInfo);
-            Response.StatusCode = 200;
+            if (!ModelState.IsValid)
+            {
+                Response.StatusCode = 400;
+                await Response.WriteAsync(ModelState.ToString());
+                return;
+            }
+
+                var user = await _identityService.Register(_mapper.Map<IdentityCreationDTO>(userInfo));
+                Response.StatusCode = 200;
+                await Response.WriteAsync(JsonConvert.SerializeObject(user,
+                    new JsonSerializerSettings {Formatting = Formatting.Indented}));
+            
         }
 
         [AllowAnonymous]
         [HttpPost("/token")]
-        public async Task Token(UserLoginInfo userInfo)
+        public async Task Token(LoginInfo info)
         {
-            var identity = await _identityService.Login(userInfo, "Token");
+            var identity = await _identityService.Login(info, "Token");
             if (identity == null)
             {
                 Response.StatusCode = 400;
@@ -63,7 +73,7 @@ namespace Presentation.Controllers
             var response = new
             {
                 access_token = encodedJwt,
-                claims = User.FindFirst("Id")
+                claims = identity.Claims.First(x=> x.Type == "Id").Value
             };
             await Response.WriteAsync(JsonConvert.SerializeObject(response,
                 new JsonSerializerSettings {Formatting = Formatting.Indented}));

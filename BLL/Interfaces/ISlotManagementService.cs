@@ -9,7 +9,7 @@ namespace BLL.Interfaces
     public interface ISlotManagementService : IDisposable
     {
         Task<int> CreateSlot(int userId, SlotCreationDTO slotDTO);
-        Task DeleteSlot(int slotId, int userId);
+        Task<string> DeleteSlot(int slotId, int userId);
         Task AddImageLink(int id, string link);
         Task AddTags(int slotId, IEnumerable<int> tagIds);
         Task RemoveTags(int slotId, IEnumerable<int> tagIds);

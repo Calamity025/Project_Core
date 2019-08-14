@@ -37,7 +37,6 @@ namespace DAL
                 .Property(p => p.Id)
                 .UseSqlServerIdentityColumn()
                 .Metadata.BeforeSaveBehavior = PropertySaveBehavior.Ignore;
-            builder.Entity<User>(entity => entity.HasIndex(i => i.UserName).IsUnique());
             builder.Entity<User>()
                 .Property(p => p.Id)
                 .UseSqlServerIdentityColumn()

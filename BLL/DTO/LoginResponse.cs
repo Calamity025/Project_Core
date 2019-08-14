@@ -5,15 +5,9 @@ using System.Text;
 
 namespace BLL.DTO
 {
-    public class UserLoginResponse
+    public class LoginResponse
     {
         public ClaimsIdentity ClaimsIdentity { get; set; }
         public UserDTO User { get; set; }
-        public class UserDTO
-        {
-            public int Id { get; set; }
-            public string UserName { get; set; }
-            public string AvatarLink { get; set; }
-        }
     }
 }

@@ -143,7 +143,8 @@ namespace Presentation.Controllers
         [HttpDelete("{id}")]
         public async Task Delete(int id)
         {
-            await _slotManagementService.DeleteSlot(id, Convert.ToInt32(User.FindFirst("Id").Value));
+            string imageLink = await _slotManagementService.DeleteSlot(id, Convert.ToInt32(User.FindFirst("Id").Value));
+            System.IO.File.Delete(imageLink.Replace("/", "\\"));
         }
     }
 }

@@ -1,0 +1,27 @@
+<div class="mx-auto border rounded p-3" style="width: 750px;">
+  <form class="d-flex" [formGroup]="uploadForm">   
+  <div class="col-5 p-2 d-flex flex-column"> 
+    <div class=" pb-4 align-self-center"> 
+      <img class="img-thumbnail" [src]="previewLink ? previewLink : '/UserAvatars/defaultUser.png'" style="height: 260px; width: auto">
+    </div>
+    <div class="align-self-center">
+        <div class="input-group mb-3">
+            <div class="custom-file">
+              <input type="file" ame="profile" (change)="onFileSelect($event)" class="custom-file-input" id="inputGroupFile01">
+              <label class="custom-file-label" for="inputGroupFile01">{{fileName}}</label>
+            </div>
+          </div>
+    </div> 
+  </div>
+  <div class="col-7 p-2 d-flex flex-column">
+    <label for="inputFirstName3" class="control-label">Введите Ваше имя</label>
+    <input name="FirstName" type="text" class="form-control" id="FirstName" placeholder="FirstName" (input)="onFirstNameInput($event.target.value)"/><br>
+    <label for="inputLastName3" class="control-label">Введите Вашу фамилию</label>
+    <input name="LastName" type="text" class="form-control" id="LastName" placeholder="LastName" (input)="onLastNameInput($event.target.value)"/><br>
+    <label for="inputAddress3" class="control-label">Введите адресс доставки</label>
+    <input name="Address" type="text" class="form-control" id="Address" placeholder="Address" (input)="onAddressInput($event.target.value)"/><br>
+    <button type="submit" class="btn btn-success align-self-end" (click)="onSubmitClick($event)" 
+    [disabled]="buttonIsDisabled">Submit</button>
+  </div>
+  </form>
+</div>
