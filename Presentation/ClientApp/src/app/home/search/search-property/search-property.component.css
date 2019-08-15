@@ -1,0 +1,8 @@
+a:hover div, .categories:hover, .tags:hover {
+    background-color: rgba(240, 255, 255, 0.7);
+}
+
+.selected {
+    border-right: 4px solid aqua;
+    background: linear-gradient(to left, rgba(240, 255, 255, 1), rgba(240, 255, 255, 0))
+}

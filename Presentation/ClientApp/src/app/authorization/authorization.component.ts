@@ -56,9 +56,11 @@ export class AuthorizationComponent implements OnInit {
   setUser() {
     this.authService.getCurrentUser().subscribe(
       (val : User) => {
-        this.globals.isAuthorized = val.isAuthorized;
-        this.currentUser = val;
-        this.cdRef.detectChanges();
+        if(!!val){
+          this.globals.isAuthorized = val.isAuthorized;
+          this.currentUser = val;
+          this.cdRef.detectChanges();
+        }
       }
     )
   }

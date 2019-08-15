@@ -11,7 +11,9 @@ namespace BLL
     {
         public BLLProfile()
         {
-            CreateMap<SlotCreationDTO, Slot>().ForMember(src => src.Id, opt => opt.Ignore());
+            CreateMap<SlotCreationDTO, Slot>()
+                .ForMember(src => src.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.MinBet, opt => opt.MapFrom(x=>x.Step));
             CreateMap<Slot, SlotMinimumDTO>();
             CreateMap<Slot, SlotFullDTO>();
             CreateMap<IdentityCreationDTO, User>().ForMember(src => src.Id, opt => opt.Ignore());

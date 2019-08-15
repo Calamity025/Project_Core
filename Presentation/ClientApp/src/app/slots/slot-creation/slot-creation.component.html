@@ -1,0 +1,69 @@
+<div class="mx-auto border rounded p-3" style="width: 1000px;">
+    <form class="d-flex flex-wrap" [formGroup]="uploadForm">   
+      <div class="col-5 p-2 d-flex flex-column"> 
+        <div class=" pb-4 align-self-center"> 
+          <img class="img-thumbnail" [src]="previewLink ? previewLink : '/SlotImages/default.jpg'" style="height: 260px; width: auto">
+        </div>
+        <div class="align-self-center">
+            <div class="input-group mb-3">
+                <div class="custom-file" style="overflow: hidden;">
+                  <input type="file" ame="profile" (change)="onFileSelect($event)" class="custom-file-input" id="inputGroupFile01">
+                  <label class="custom-file-label" for="inputGroupFile01" >{{fileName}}</label>
+                </div>
+              </div>
+        </div> 
+      </div>
+      <div class="col-7 p-2 d-flex flex-column">
+        <label for="inputTitle3" class="control-label">Название</label>
+        <input name="Title" type="text" class="form-control" id="Title" placeholder="Title" (input)="onTitleInput($event.target.value)"/><br>
+        <label class="control-label" for="inlineFormCustomSelectPref">Категория</label>
+        <select class="custom-select" id="inlineFormCustomSelectPref" [(ngModel)]="selectedCategory" [ngModelOptions]="{standalone: true}">
+          <option *ngFor="let category of searchService.categories">
+            {{category.name}}
+          </option>
+        </select><br>
+        <label class="control-label" for="inlineFormCustomSelectPref">Теги</label>
+        <div class="border rounded d-flex flex-wrap align-items-center p-2">
+          <div class="tagDiv border rounded mr-2" *ngFor="let tag of selectedTags">
+              <small class="px-1">{{tag.name}}</small>
+            <button type="button" class="btn btn-danger btn-sm" (click)="onRemoveTagClick(tag)">X</button>
+          </div>
+          <div class="d-flex col-6 pl-0">
+            <div class="input-group input-group-sm pr-2" *ngIf="isAddTagPressed">
+              <input class="form-control" list="tags" type="text" (input)="onTagInput($event.target.value)">
+              <div class="input-group-append">
+                  <button class="btn btn-outline-success btn-sm" type="button" (click)="onAddTagClick()">+</button>
+              </div>
+              <div class="input-group-append">
+                  <button class="btn btn-outline-danger btn-sm" type="button" (click)="onCloseAddTagClick()">&ndash;</button>
+              </div>
+              <datalist id="tags">
+                <option *ngFor="let tag of searchService.tags" [value]="tag.name"></option>
+              </datalist>
+            </div>
+          <button type="button" class="btn btn-primary btn-sm" (click)="onAddTagActivateClick()" *ngIf="!isAddTagPressed">Добавить</button>
+          </div>
+          <div class="ml-auto align-self-end">
+            <span style="user-select: none">{{currentCount}}/{{capacity}}</span>
+          </div>
+        </div>
+        <div class="mt-2 d-flex">
+          <div class="col-6 pl-0">
+            <label for="inputPrice3" class="control-label">Начальная цена</label>
+            <input name="Price" type="number" class="form-control" id="Price" placeholder="{{'0.00' | currency: USD }}" step="0.01" min="0" max="100000000" (input)="onPriceInput($event.target.value)"/><br>
+          </div>
+          <div class="col-6 pr-0 align-self-end">
+            <label for="inputPrice3" class="control-label">Шаг</label>
+            <input name="Price" type="number" class="form-control" id="Step" placeholder="0" step="1" min="0" max="100000000" (input)="onStepInput($event.target.value)"/><br>  
+          </div>
+        </div>
+      </div>
+      <div class="col-11 px-0 mx-auto mb-4">
+          <label for="inputDescription3" class="control-label">Описание</label>
+          <textarea class="form-control" maxlength="2048" rows="7" (input)="onDescriptionInput($event.target.value)"></textarea>
+      </div>
+      <div class="col-12 d-flex">
+        <button type="submit" class="btn btn-success ml-auto align-self-end" (click)="onSubmitClick($event)" [disabled]="buttonIsDisabled">Создать</button>
+      </div>
+    </form>
+  </div>

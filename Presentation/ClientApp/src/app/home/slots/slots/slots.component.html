@@ -1,0 +1,11 @@
+<div class="d-flex ">
+  <div class="col-9">
+    Search field
+  </div>
+  <div class="col-3 d-flex justify-content-center">
+    <button type="button" class="btn btn-outline-primary" (click)="router.navigate(['/create'])" *ngIf="globals.isAuthorized">Cоздать слот</button>
+  </div>
+</div>
+<div class="col-12">
+    Slots
+  </div>

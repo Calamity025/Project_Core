@@ -74,7 +74,7 @@ export class ProfileCreationComponent implements OnInit {
       this.uploadForm.get('profile').setValue(file);
       var reader = new FileReader();
       reader.readAsDataURL(event.target.files[0]); 
-      reader.onload = (event) => { 
+      reader.onload = (event:any) => { 
         this.previewLink = event.target.result;
       }
       this.fileName = file.name;

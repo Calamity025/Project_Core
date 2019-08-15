@@ -11,9 +11,9 @@ namespace Presentation.Models
         public string  Name { get; set; }
         public decimal Price { get; set; }
         public int CategoryId { get; set; }
-        public decimal MinBet { get; set; }
+        public decimal Step { get; set; }
         public DateTime EndTime { get; set; }
-        public ICollection<int> SlotTagsId { get; set; }
+        public int[] SlotTagIds { get; set; }
         public string Description { get; set; }
     }
 }

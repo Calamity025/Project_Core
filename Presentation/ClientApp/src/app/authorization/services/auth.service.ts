@@ -52,12 +52,15 @@ export class AuthService {
     }
   
     public getCurrentUser(): Observable<User> {
-      if(!!this.currentUser){
-        console.log(this.currentUser);
-        return of(this.currentUser);
+      if(!this.jwtService.isExpired()){
+        if(!!this.currentUser){
+          console.log(this.currentUser);
+          return of(this.currentUser);
+        }
+        
+        return this.httpClient.get<User>('https://localhost:44324/Account/Current')
+        .pipe(tap(x => this.currentUser = x));
       }
-      
-      return this.httpClient.get<User>('https://localhost:44324/Account/Current')
-      .pipe(tap(x => this.currentUser = x));
+      return of(null);
     }
 }

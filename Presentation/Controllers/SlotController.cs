@@ -81,17 +81,13 @@ namespace Presentation.Controllers
         [HttpPost]
         public async Task Post([FromBody] SlotCreationModel newSlot)
         {
+            var r = Request;
             var id = Convert.ToInt32(User.Claims.First(x => x.Type == "Id").Value);
-            try
-            {
+            
                 int slotId = await _slotManagementService.CreateSlot(id, _mapper.Map<SlotCreationDTO>(newSlot));
                 Response.StatusCode = 200;
                 await Response.WriteAsync(slotId.ToString());
-            }
-            catch (Exception)
-            {
-                Response.StatusCode = 500;
-            }
+            
         }
 
         // POST: api/Slot

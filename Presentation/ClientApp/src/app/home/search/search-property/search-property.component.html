@@ -1,0 +1,56 @@
+<div class="border rounded-bottom">
+  <div class="d-flex">
+    <div class="col-6 px-0" style="text-align: center;" [ngStyle]="{'border-bottom': isSwitcherOn ? '5px solid aqua' : 'none'}">
+      <a (click)="onCategoryClick($event)">
+        <div class="py-3" style="position: relative">
+          <span class="text-center" style="user-select: none">Категории</span>
+        </div>
+      </a>
+    </div>
+    <div class="col-6 px-0 border-left" style="text-align: center;" [ngStyle]="{'border-bottom': !isSwitcherOn ? '5px solid aqua' : 'none'}">
+      <a (click)="onTagClick($event)">
+          <div class="py-3" style="position: relative">
+              <span style="user-select: none">Теги</span>
+          </div>
+        </a>
+    </div>
+  </div>
+  <div class="border-top p-3">
+    <div *ngIf="isSwitcherOn">
+      <div class="categories py-2 pl-2" *ngFor="let category of searchService.categories" (click)="onCategorySelect(category)" [class.selected]="category == selectedCategory">
+        <span style="user-select: none">{{category.name}}</span>
+      </div>
+      <div *ngIf="isFormActivated">
+        <div class="input-group mt-3">
+            <input type="text" class="form-control" placeholder="Название" (input)="onCategoryNameInput($event.target.value)">
+            <div class="input-group-append">
+              <button class="btn btn-outline-secondary" type="button" (click)="onCategoryAdd($event)">Создать</button>
+            </div>
+          </div>
+      </div>
+      <a (click)="onAddButtonClick($event)">
+          <div class="p-2 border rounded mt-3" style="text-align: center;position: relative">
+            <span class="text-center" style="user-select: none">Создать новую</span>
+          </div>
+        </a>
+    </div>
+    <div *ngIf="!isSwitcherOn">
+        <div class="tags py-2 pl-2" *ngFor="let tag of searchService.tags" (click)="onTagSelect(tag)" [class.selected]="selectedTags.indexOf(tag) != -1">
+            <span style="user-select: none">{{tag.name}}</span>
+          </div>
+      <div *ngIf="isFormActivated">
+        <div class="input-group mt-3">
+          <input type="text" class="form-control" placeholder="Название" (input)="onTagNameInput($event.target.value)">
+          <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="button" (click)="onTagAdd($event)">Создать</button>
+          </div>
+        </div>
+      </div>
+      <a (click)="onAddButtonClick($event)">
+        <div class="p-2 border rounded mt-3" style="text-align: center;position: relative">
+          <span class="text-center" style="user-select: none">Создать новый</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>

@@ -34,10 +34,11 @@ namespace BLL.Services
                 throw new NotFoundException();
             }
 
-            List<Tag> tags = await _db.Tags.GetAll().Where(x => slotDTO.SlotTagsId.Contains(x.Id)).ToListAsync();
+            List<Tag> tags = await _db.Tags.GetAll().Where(x => slotDTO.SlotTagIds.Contains(x.Id)).ToListAsync();
             var newSlot = _mapper.Map<Slot>(slotDTO);
             newSlot.Category = category;
             newSlot.SlotTags = tags;
+            newSlot.Status = Status.SlotStatus.Started.ToString();
             _db.BetHistories.Create(new BetHistory() { Slot = newSlot, UserId = seller.Id, Price = slotDTO.Price });
             _db.Slots.Create(newSlot);
             seller.PlacedSlots.Add(newSlot);
