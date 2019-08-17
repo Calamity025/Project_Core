@@ -1,6 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Globals } from 'src/app/Globals.component';
+import { SearchService } from '../../../services/search.service';
+import { Observable, fromEvent } from 'rxjs';
+import { map, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { slotMinimum } from 'src/app/models/slotMinimum';
+import { AuthService } from 'src/app/services';
 
 @Component({
   selector: 'app-slots',
@@ -8,11 +12,30 @@ import { Globals } from 'src/app/Globals.component';
   styleUrls: ['./slots.component.css']
 })
 export class SlotsComponent implements OnInit {
+  isAuthorized? : boolean;
 
   constructor(private router : Router,
-    private globals : Globals) { }
+    private authService : AuthService,
+    private searchService : SearchService) {
+    }
 
   ngOnInit() {
+    this.authService.isAuthorized$.subscribe(val => this.isAuthorized = val);
   }
 
+  ngAfterViewInit(): void {
+    let input = document.getElementById('search');
+    let observable = fromEvent(input, 'input');
+
+    observable.pipe(
+      map(event => (<HTMLInputElement>event.target).value),
+      debounceTime(500),
+      distinctUntilChanged()
+    )
+    .subscribe({next: value => this.searchService.getSlotsByName(value)});
+  }
+
+  onSlotClick(slot : slotMinimum){
+    this.router.navigate(['slot/' + slot.id]);
+  }
 }

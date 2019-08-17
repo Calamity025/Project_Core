@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
-import { SearchService } from 'src/app/home/search/search.service';
+import { SearchService } from 'src/app/services/search.service';
 import { Tag } from 'src/app/models/tag';
 import { SlotCreationModel } from 'src/app/models/SlotCreationModel';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Globals } from 'src/app/Globals.component';
+import { AuthService } from 'src/app/services';
+import { Category } from 'src/app/models/category';
 
 @Component({
   selector: 'app-slot-creation',
@@ -20,21 +21,25 @@ export class SlotCreationComponent implements OnInit {
   uploadForm: FormGroup; 
   selectedCategory?;
   selectedTags? : Tag[] = [];
-  capacity = 10;
+  capacity = 5;
   currentCount = 0;
   tempTag? : string;
   isAddTagPressed : boolean = false;
   step? : number;
   description? : string;
+  isTagsValid : boolean = true;
   
   constructor(private formBuilder: FormBuilder,
     private searchService : SearchService,
     private httpClient : HttpClient,
     private router : Router,
-    private globals : Globals) {
-      if(!globals.isAuthorized){
-        router.navigate(['/']);
-      }
+    private authService : AuthService) {
+      authService.isAuthorized$.subscribe(
+        val => {
+        if(!val){
+          router.navigate(['/']);
+        }
+      });
      }
 
   ngOnInit() {
@@ -66,12 +71,20 @@ export class SlotCreationComponent implements OnInit {
 
     this.httpClient.post<any>('https://localhost:44324/api/Slot', slot)
       .subscribe(val => {
-        const formData = new FormData();
-        formData.append('file', this.uploadForm.get('profile').value);
-        this.httpClient.post<any>('https://localhost:44324/api/Slot/image/' + val, formData).subscribe(() => {
+        if(this.uploadForm.get('profile').value){
+          const formData = new FormData();
+          formData.append('file', this.uploadForm.get('profile').value);
+          this.httpClient.post<any>('https://localhost:44324/api/Slot/image/' + val, formData)
+          .subscribe(val => {
+            if(val){
+              this.router.navigate(['/']);
+              }
+            })
+        }
+        else{
           this.router.navigate(['/']);
-        });
-      });
+        }
+    });
   }
 
   onTagInput(name : string){
@@ -83,10 +96,14 @@ export class SlotCreationComponent implements OnInit {
   }
 
   onAddTagClick(){
-    if(!!!this.selectedTags.find(t => t.name == this.tempTag) && this.currentCount < this.capacity){
+    if(!!!this.selectedTags.find(t => t.name == this.tempTag) && this.currentCount < this.capacity && !!this.tempTag){
       this.selectedTags.push(this.searchService.tags.find(t => t.name == this.tempTag));
       this.isAddTagPressed = false;
       this.currentCount++;
+      this.isTagsValid = true;
+    }
+    else{
+      this.isTagsValid = false;
     }
   }
 

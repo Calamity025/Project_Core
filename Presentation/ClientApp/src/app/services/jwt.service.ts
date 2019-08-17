@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { JwtPayload } from '../../models/jwt-payload';
+import { JwtPayload } from '../models/jwt-payload';
 
 @Injectable()
 export class JwtService {

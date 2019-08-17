@@ -9,12 +9,13 @@ namespace BLL.DTO
     {
         public string Name { get; set; }
         public decimal Price { get; set; }
-        public decimal MinBet { get; set; }
+        public decimal Step { get; set; }
         public DateTime EndTime { get; set; }
         public string Status { get; set; }
         public Category Category { get; set; }
         public ICollection<Tag> SlotTags { get; set; }
         public string Description { get; set; }
         public string ImageLink { get; set; }
+        public UserDTO User { get; set; }
     }
 }

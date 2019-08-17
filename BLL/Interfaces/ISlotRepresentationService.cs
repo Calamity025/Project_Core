@@ -12,6 +12,8 @@ namespace BLL.Interfaces
     {
         Task<IEnumerable<SlotMinimumDTO>> GetPage(int pageNumber, int slotsOnPage);
         Task<SlotFullDTO> GetSlot(int id);
+        Task<decimal> GetSlotPrice(int id);
+        Task<decimal> GetUserBet(int id, int userId);
         Task<IEnumerable<SlotMinimumDTO>> GetByCategory(int categoryId, 
             int pageNumber, int slotsOnPage);
         Task<IEnumerable<SlotMinimumDTO>> GetByTags(IEnumerable<int> tagIds, 
@@ -21,6 +23,7 @@ namespace BLL.Interfaces
         Task<IEnumerable<SlotMinimumDTO>> GetUserFollowingSlots(int userId);
         Task<IEnumerable<SlotMinimumDTO>> GetUserSlots(int userId);
         Task<string> GetSlotImage(int slotId);
+        Task<IEnumerable<Slot>> GetExpiredSlots();
 
     }
 }

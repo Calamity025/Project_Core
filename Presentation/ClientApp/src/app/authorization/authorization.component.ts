@@ -1,9 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { AuthService, ReqResService } from './services';
+import { AuthService, ReqResService } from '../services';
 import { Router } from '@angular/router';
 import { User, LoginModel, UserRegistrationModel } from '../models';
-import { catchError } from 'rxjs/operators';
-import { Globals } from '../Globals.component';
 
 @Component({
   selector: 'app-authorization',
@@ -12,19 +10,21 @@ import { Globals } from '../Globals.component';
 })
 export class AuthorizationComponent implements OnInit {
   isLoading = false;
-  currentUser : User;
+  isAuthorized? : boolean;
+  currentUser? : User;
   password? : string;
   login? : string;
   email? : string;
 
   constructor(private authService: AuthService, 
-    private globals : Globals,
     private cdRef: ChangeDetectorRef,
     private router : Router) {
-      this.setUser()
    }
 
   ngOnInit() {
+    this.authService.isAuthorized$.subscribe(val => this.isAuthorized = val);
+    this.authService.currentUser$.subscribe(val => this.currentUser = val);
+    this.authService.getCurrentUser()
   }
 
   onLoginInput(value: string) {
@@ -42,27 +42,13 @@ export class AuthorizationComponent implements OnInit {
       login: this.login,
       password: this.password
     };
-
-    this.authService.signIn(user).subscribe(val => {
-      this.setUser();
-    });
+    console.log(user);
+    this.authService.signIn(user);
   }
 
   logOut() {
-    this.authService.signOut().subscribe(() => this.globals.isAuthorized = false);
+    this.authService.signOut();
     
-  }
-
-  setUser() {
-    this.authService.getCurrentUser().subscribe(
-      (val : User) => {
-        if(!!val){
-          this.globals.isAuthorized = val.isAuthorized;
-          this.currentUser = val;
-          this.cdRef.detectChanges();
-        }
-      }
-    )
   }
 
   onEmailInput(value: string) {
@@ -84,15 +70,10 @@ export class AuthorizationComponent implements OnInit {
         login: this.login,
         password: this.password
       };
-      this.authService.signIn(loginInfo)
-      .subscribe(() => {
-        this.authService.getCurrentUser()
-          .subscribe(val => {
-            this.router.navigate(["/register/profile"]); 
-            this.globals.isAuthorized = val.isAuthorized;
-            this.currentUser = val;});
-        })
-    }},
-    error => console.log(error))
+      this.authService.signIn(loginInfo);
+      this.router.navigate(["/register/profile"]); 
+      this.authService.isAuthorized$.next(true);
+      }
+    })
   }
 }

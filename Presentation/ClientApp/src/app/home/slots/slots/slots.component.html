@@ -1,11 +1,22 @@
 <div class="d-flex ">
-  <div class="col-9">
-    Search field
+  <div class="col-8">
+    <div class="input-group">
+        <input id="search" type="text" class="form-control" placeholder="Название слота">
+        <div class="input-group-append px-3 border rounded">
+          <img src='/search.svg'>
+        </div>
+      </div>
   </div>
-  <div class="col-3 d-flex justify-content-center">
-    <button type="button" class="btn btn-outline-primary" (click)="router.navigate(['/create'])" *ngIf="globals.isAuthorized">Cоздать слот</button>
+  <div class="col-4 d-flex justify-content-start">
+    <button type="button" class="btn btn-outline-primary" (click)="router.navigate(['/create'])" *ngIf="isAuthorized">Cоздать слот</button>
   </div>
 </div>
-<div class="col-12">
-    Slots
+<div class="d-flex flex-wrap align-items-start col-12 p-4">
+  <h3 *ngIf="searchService.selectedSlots.length == 0">Ничего не найдено</h3>
+  <div class="slot border rounded m-2 p-2 px-1" style="width: 13rem; overflow: hidden;" *ngFor="let slot of searchService.selectedSlots" (click)="onSlotClick(slot)">
+    <img [src]="slot.imageLink ? slot.imageLink : '/SlotImages/default.jpg'" style="height: 200px;" class="img-thumbnail mx-auto d-block mb-2">
+    <div style="text-align: center">
+      <span style="user-select: none">{{slot.name}}</span>
+    </div>
   </div>
+</div>

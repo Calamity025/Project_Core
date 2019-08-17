@@ -1,5 +1,5 @@
 a:hover div, .categories:hover, .tags:hover {
-    background-color: rgba(240, 255, 255, 0.7);
+    box-shadow: 0 0 10px rgba(0,0,0,0.15);
 }
 
 .selected {

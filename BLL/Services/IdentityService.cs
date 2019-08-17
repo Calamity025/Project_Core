@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,6 +10,7 @@ using BLL.Interfaces;
 using DAL.Interfaces;
 using Entities;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace BLL.Services
 {
@@ -41,6 +43,7 @@ namespace BLL.Services
                 await _identity.UserManager.CreateAsync(user, identityCreation.Password);
                 await _identity.UserManager.AddClaimAsync(user, new Claim(ClaimsIdentity.DefaultNameClaimType, user.UserName));
                 await _identity.UserManager.AddClaimAsync(user, new Claim("Id", user.Id.ToString()));
+                await _identity.UserManager.AddToRoleAsync(user, "user");
                 return _mapper.Map<UserDTO>(user);
             }
             catch (Exception e)
@@ -57,23 +60,32 @@ namespace BLL.Services
             if (user != null && await _identity.UserManager.CheckPasswordAsync(user, loginInfo.Password))
             {
                 var claims = await _identity.UserManager.GetClaimsAsync(user);
+                foreach (var role in await _identity.UserManager.GetRolesAsync(user))
+                {
+                    var roleClaim = new Claim(ClaimTypes.Role, role);
+                    claims.Add(roleClaim);
+                }
 
                 return new ClaimsIdentity(claims, authType);
             }
             return null;
         }
 
-        public async Task<LoginResponse> GetCurrentUser(string name)
+        public async Task<UserDTO> GetCurrentUser(string name)
         {
             User user = await _identity.UserManager.FindByNameAsync(name);
-            LoginResponse res = new LoginResponse()
-            {
-                ClaimsIdentity = new ClaimsIdentity(await _identity.UserManager.GetClaimsAsync(user), "Token"),
-                User = _mapper.Map<UserDTO>(user)
-            };
-            UserInfo info = await _db.UserInfos.GetAsync(user.Id);
-            res.User.AvatarLink = info.ImageLink;
+            UserDTO res = _mapper.Map<UserDTO>(user);
+            UserInfo info = await _db.UserInfos.GetAll()
+                .Where(x => x.Id == user.Id).Include(x => x.FollowingSlots).FirstAsync();
+            res.AvatarLink = info.ImageLink;
+            res.FollowingSlots = info.FollowingSlots.Select(x => x.Id);
+            res.Roles = await _identity.UserManager.GetRolesAsync(user);
             return res;
+        }
+
+        public async Task AddToRole(int id, string roleName)
+        {
+
         }
 
         bool disposed = false;

@@ -1,5 +1,5 @@
 import { Component, ChangeDetectorRef } from '@angular/core';
-import { AuthService, ReqResService } from '../authorization/services';
+import { AuthService, ReqResService } from '../services';
 import { LoginModel, User } from '../models';
 import { map, tap, catchError } from 'rxjs/operators';
 import { Observable } from 'rxjs';

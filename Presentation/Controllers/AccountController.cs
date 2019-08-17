@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
@@ -34,18 +35,24 @@ namespace Presentation.Controllers
         [AllowAnonymous]
         public async Task Register([FromBody] UserRegistrationModel userInfo)
         {
-            if (!ModelState.IsValid)
+            if (!TryValidateModel(userInfo))
             {
                 Response.StatusCode = 400;
                 await Response.WriteAsync(ModelState.ToString());
                 return;
             }
 
+            try
+            {
                 var user = await _identityService.Register(_mapper.Map<IdentityCreationDTO>(userInfo));
                 Response.StatusCode = 200;
                 await Response.WriteAsync(JsonConvert.SerializeObject(user,
-                    new JsonSerializerSettings {Formatting = Formatting.Indented}));
-            
+                    new JsonSerializerSettings { Formatting = Formatting.Indented }));
+            }
+            catch
+            {
+                Response.StatusCode = 500;
+            }
         }
 
         [AllowAnonymous]
@@ -73,25 +80,17 @@ namespace Presentation.Controllers
             var response = new
             {
                 access_token = encodedJwt,
-                claims = identity.Claims.First(x=> x.Type == "Id").Value
+                claims = identity.Claims.FirstOrDefault(x=> x.Type == "Id")?.Value
             };
             await Response.WriteAsync(JsonConvert.SerializeObject(response,
                 new JsonSerializerSettings {Formatting = Formatting.Indented}));
         }
 
-        [AllowAnonymous]
         [HttpGet]
         [Route("Current")]
         public async Task GetCurrentUser()
         {
-            if (!User.Identity.IsAuthenticated)
-            {
-                Response.StatusCode = 401;
-                return;
-            }
-
-            CurrentUserModel response = _mapper.Map<CurrentUserModel>(await _identityService.GetCurrentUser(User.Identity.Name));
-            response.isAuthorized = User.Identity.IsAuthenticated;
+            UserDTO response = await _identityService.GetCurrentUser(User.Identity.Name);
 
             await Response.WriteAsync(JsonConvert.SerializeObject(response,
                 new JsonSerializerSettings {Formatting = Formatting.Indented}));

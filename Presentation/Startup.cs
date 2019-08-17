@@ -44,7 +44,9 @@ namespace Presentation
             services.AddScoped<ITagManagementService, TagManagementService>();
             services.AddScoped<IProfileManagementService, ProfileManagementService>();
             services.AddScoped<IIdentityService, IdentityService>();
+            services.AddHostedService<SlotAutoclosingHostingService>();
             BLLModule.ConfigureServices(services, Configuration.GetConnectionString("DefaultConnection"));
+            
 
             var mappingConfig = new MapperConfiguration(mc =>
             {

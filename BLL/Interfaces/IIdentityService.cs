@@ -12,6 +12,6 @@ namespace BLL.Interfaces
     {
         Task<UserDTO> Register(IdentityCreationDTO identity);
         Task<ClaimsIdentity> Login(LoginInfo info, string authType);
-        Task<LoginResponse> GetCurrentUser(string name);
+        Task<UserDTO> GetCurrentUser(string name);
     }
 }

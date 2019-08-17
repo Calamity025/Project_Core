@@ -1,0 +1,110 @@
+<p *ngIf="!!!slot">Loading...</p>
+<div *ngIf="!!slot">
+  <div class="mx-auto rounded col-8 p-3" style="box-shadow: 0px 0px 10px rgba(0,0,0,0.35)">
+    <div class="d-flex">
+      <div class="mr-auto">
+        <button type="button" class="btn btn-secondary px-1" (click)="onBackClick()">&larr; Назад</button>
+      </div>
+      <div class="px-1" *ngIf="isAuthorized">
+        <button type="button" class="btn px-1" [class.btn-outline-primary]="isFollowing" [class.btn-primary]="!isFollowing" (click)="onFollowClick()">Следить</button>
+      </div>
+      <div class="px-1">
+        <button type="button" class="btn btn-warning px-1" *ngIf="isAuthorized && isSeller" (click)="onEditClick()">Редактировать</button>
+      </div>
+      <div class="px-1">
+        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal" *ngIf="isAuthorized && isSeller">Удалить</button>
+      </div>
+      <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Удалить слот?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                Вы уверены, что хотите удалить слот?
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Нет</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal" (click)="onDeleteClick()">Удалить</button>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+    <h1 class="display-4 ml-3 mt-4">{{slot.name}} <span class="h3">
+      <span [ngSwitch]="slot.status | lowercase">
+        <span class="badge badge-success" *ngSwitchCase="'started'">
+          {{slot.status}}
+        </span>
+        <span class="badge badge-secondary" *ngSwitchCase="'finished'">
+          {{slot.status}}
+        </span>
+        <span class="badge badge-danger" *ngSwitchCase="'closed'">
+            {{slot.status}}
+        </span>
+      </span>
+    </span>
+    </h1>
+    <div class="d-flex flex-wrap flex-row-reverse mb-2">
+      <span class="lead text-muted border rounded py-1 px-2 ml-2" *ngFor="let tag of slot.slotTags">{{tag.name}}</span>
+      <span class="lead ml-3 text-muted align-self-start mr-auto ">{{slot.category.name}}</span>
+    </div>
+    <hr style="border-top: 3px solid rgba(0, 0, 0, 0.1); box-shadow: 0 0 5px rgba(0,0,0,0.15);"/>
+    <div class="d-flex px-0 col-12 d-flex">
+      <div class="col-5 p-2">
+        <img [src]="slot.imageLink ? slot.imageLink : '/SlotImages/default.jpg'" style="width: 95%;" class="img-thumbnail">
+      </div>
+      <div class="col-7">
+        <div class="col-12" style="text-align: end">
+          <span class="lead pr-3">Продавец: </span>
+          <img [src]="slot.user.avatarLink ? slot.user.avatarLink : '/UserAvatars/defaultUser.png' " class="rounded-circle" style="height: 20px">
+          <a>
+            {{slot.user.userName}}
+          </a>
+        </div>
+        <div class="p-2 d-flex flex-column justify-content-center align-items-center" style="height: 100%">
+          <div style="text-align: center" class="mb-2" >
+            <span class="lead">Оставшееся время: {{days}} дней : {{hours}} часов : {{minutes}} минут</span>
+          </div>
+          <div class="d-flex flex-wrap align-items-end justify-content-center p-2">
+            <span class="lead pr-4">Текущая цена: </span>
+            <div class="pr-3">
+              <span class="h2">{{slot.price | number:'1.2-2'}} UAH</span>
+            </div>
+            <div class="button rounded p-2" (click)="onRefreshClick()">
+              <small style="user-select: none;">
+                Обновить цену
+              </small>
+            </div>
+          </div>
+          <div class="my-2" *ngIf="userBet" style="text-align: center">
+              <span class="lead">Ваша ставка: {{userBet | number:'1.2-2'}} UAH</span>
+          </div>
+          <div class="my-2" style="text-align: center">
+              <span class="lead">Шаг ставки: {{slot.step | number:'1.2-2'}} UAH</span>
+          </div>
+          <div class="mx-auto my-2 p-2 d-flex flex-wrap flex-column align-items-center">
+            <form *ngIf="isMakeBetClicked">
+              <div class="input-group">
+                <input name="bet" type="number" class="form-control" id="bet" [class.is-invalid]="isNotValid" [step]="slot.step" [min]="slot.price + slot.step" (input)="onBetInput($event.target.value)"/><br>
+                <div class="input-group-append">
+                    <button class="btn btn-success" type="button" (click)="onMakeBetClick()">Поставить</button>
+                </div>
+            </div>
+            </form>
+            <button type="button" class="btn btn-lg btn-success" *ngIf="!isMakeBetClicked" [disabled]="!isAuthorized"  (click)="onBetClick()">Сделать ставку</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="p-2">
+      <h3>Описание:</h3>
+      <div class="col-12" style="text-align: justify">
+        <span>{{slot.description}}</span>
+      </div>
+    </div>
+  </div>
+</div>

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using BLL.Interfaces;
 using Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,7 +28,7 @@ namespace Presentation.Controllers
             return await _categoryManagementService.GetCategoryList();
         }
 
-        // POST: api/Category
+        [Authorize(Roles = "admin")]
         [HttpPost]
         public async Task<Category> Post([FromBody] Category category)
         {
@@ -42,7 +43,7 @@ namespace Presentation.Controllers
             }
         }
 
-        // PUT: api/Category/5
+        [Authorize(Roles = "admin")]
         [HttpPut("{id}")]
         public async Task<Category> Put(int id, [FromBody] Category category)
         {

@@ -10,6 +10,7 @@ using BLL.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Presentation.Models;
 
 namespace Presentation.Controllers
@@ -31,8 +32,8 @@ namespace Presentation.Controllers
 
         // GET: api/Slot
         [HttpGet]
-        [Route("page/{id:int}")]
-        public async Task<IEnumerable<SlotMinimumDTO>> Get(int id)
+        [Route("page/{id:int}&{itemsOnPage}")]
+        public async Task<IEnumerable<SlotMinimumDTO>> GetPage(int id, int itemsOnPage)
         {
             if (id < 1)
             {
@@ -40,7 +41,7 @@ namespace Presentation.Controllers
                 return null;
             }
 
-            var slotPage = await _slotRepresentationService.GetPage(id, 10);
+            var slotPage = await _slotRepresentationService.GetPage(id, itemsOnPage);
             if (!slotPage.Any())
             {
                 Response.StatusCode = 404;
@@ -51,7 +52,7 @@ namespace Presentation.Controllers
         }
 
         // GET: api/Slot/5
-        [HttpGet("{id:int}", Name = "GetSlot")]
+        [HttpGet("{id:int}")]
         public async Task<SlotFullDTO> GetSlot(int id)
         {
             if (id < 1)
@@ -68,12 +69,36 @@ namespace Presentation.Controllers
             {
                 Response.StatusCode = 404;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 Response.StatusCode = 500;
-                await Response.WriteAsync(e.Message);
             }
+
             return null;
+        }
+
+        [HttpGet("{id}/price")]
+        public async Task<decimal> GetSlotPrice(int id)
+        {
+            return await _slotRepresentationService.GetSlotPrice(id);
+        }
+
+        [Authorize]
+        [HttpGet("{id}/userBet")]
+        public async Task<decimal> GetUserBet(int id)
+        {
+            var userId = Convert.ToInt32(User.Claims.First(x => x.Type == "Id").Value);
+            try
+            {
+                var res = await _slotRepresentationService.GetUserBet(id, userId);
+                Response.StatusCode = 200;
+                return res;
+            }
+            catch
+            {
+                Response.StatusCode = 404;
+                return -1;
+            }
         }
 
         // POST: api/Slot
@@ -81,13 +106,18 @@ namespace Presentation.Controllers
         [HttpPost]
         public async Task Post([FromBody] SlotCreationModel newSlot)
         {
-            var r = Request;
             var id = Convert.ToInt32(User.Claims.First(x => x.Type == "Id").Value);
-            
+            try
+            {
                 int slotId = await _slotManagementService.CreateSlot(id, _mapper.Map<SlotCreationDTO>(newSlot));
                 Response.StatusCode = 200;
                 await Response.WriteAsync(slotId.ToString());
-            
+            }
+            catch (Exception e)
+            {
+                Response.StatusCode = 500;
+                await Response.WriteAsync(e.Message);
+            }
         }
 
         // POST: api/Slot
@@ -127,11 +157,153 @@ namespace Presentation.Controllers
 
         }
 
+        [HttpPost("byCategory/{page}&{itemsOnPage}")]
+        public async Task<IEnumerable<SlotMinimumDTO>> GetSlotsByCategory(int page, int itemsOnPage, [FromBody]int id)
+        {
+            if (id < 0)
+            {
+                Response.StatusCode = 400;
+                return null;
+            }
+
+            var slots = await _slotRepresentationService.GetByCategory(id, page, itemsOnPage);
+            if (!slots.Any())
+            {
+                Response.StatusCode = 404;
+                return null;
+            }
+
+            Response.StatusCode = 200;
+            return slots;
+        }
+
+        [HttpPost("byTags/{page}&{itemsOnPage}")]
+        public async Task<IEnumerable<SlotMinimumDTO>> GetSlotsByTags(int page, int itemsOnPage, [FromBody]int[] ids)
+        {
+            var slots = await _slotRepresentationService.GetByTags(ids, page, itemsOnPage);
+            if (!slots.Any())
+            {
+                Response.StatusCode = 404;
+                return null;
+            }
+
+            Response.StatusCode = 200;
+            return slots;
+        }
+
+        [HttpPost("byName/{page}&{itemsOnPage}")]
+        public async Task<IEnumerable<SlotMinimumDTO>> GetSlotsByName(int page, int itemsOnPage, [FromBody]string name)
+        {
+            var slots = await _slotRepresentationService.GetByName(name, page, itemsOnPage);
+            if (!slots.Any())
+            {
+                Response.StatusCode = 404;
+                return null;
+            }
+
+            Response.StatusCode = 200;
+            return slots;
+        }
+
+        [Authorize]
+        [HttpPut("makeBet/{id}")]
+        public async Task MakeBet(int id, [FromBody]decimal bet)
+        {
+            var userId = Convert.ToInt32(User.Claims.First(x => x.Type == "Id").Value);
+            try
+            {
+                await _slotManagementService.MakeBet(id, userId, bet);
+                Response.StatusCode = 204;
+            }
+            catch
+            {
+                Response.StatusCode = 500;
+            }
+        }
+
+        [Authorize]
+        [HttpDelete("undoBets/{id}")]
+        public async Task UndoBet(int id)
+        {
+            var userId = Convert.ToInt32(User.Claims.First(x => x.Type == "Id").Value);
+            try
+            {
+                await _slotManagementService.UndoBet(id, userId);
+                Response.StatusCode = 204;
+            }
+            catch
+            {
+                Response.StatusCode = 500;
+            }
+        }
+
         // PUT: api/Slot/5
         [Authorize]
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public async Task Put(int id, [FromBody] SlotUpdateDTO slotInfo)
         {
+            try
+            {
+                await _slotManagementService.UpdateGeneralInfo(id, slotInfo);
+                Response.StatusCode = 204;
+            }
+            catch
+            {
+                Response.StatusCode = 500;
+            }
+        }
+
+        [Authorize]
+        [HttpPut("{id}/image")]
+        public async Task UpdateImage(int id, IFormFile file)
+        {
+            try
+            {
+                if (!Directory.Exists(Directory.GetCurrentDirectory() + "\\wwwroot\\SlotImages\\"))
+                {
+                    Directory.CreateDirectory(Directory.GetCurrentDirectory() + "\\wwwroot\\SlotImages\\");
+                }
+
+                using (FileStream filestream = System.IO.File.Create(
+                    Directory.GetCurrentDirectory() + "\\wwwroot\\SlotImages\\" +
+                    $"{Path.GetFileNameWithoutExtension(file.FileName)}_{id}{Path.GetExtension(file.FileName)}"))
+                {
+                    var slot = await _slotRepresentationService.GetSlot(id);
+                    string link = slot.ImageLink;
+                    link = Directory.GetCurrentDirectory() + "\\wwwroot" + link;
+                    System.IO.File.Delete(link.Replace("/", "\\"));
+                    file.CopyTo(filestream);
+                    filestream.Flush();
+                    await _slotManagementService.AddImageLink(id,
+                        $"/SlotImages/{Path.GetFileNameWithoutExtension(file.FileName)}_{id}{Path.GetExtension(file.FileName)}");
+                }
+
+                Response.StatusCode = 200;
+                await Response.WriteAsync(id.ToString());
+            }
+            catch (NotFoundException)
+            {
+                Response.StatusCode = 404;
+            }
+            catch (Exception)
+            {
+                Response.StatusCode = 500;
+            }
+        }
+
+        [Authorize(Roles = "admin")]
+        [HttpPut("{id}/status")]
+        public async Task UpdateStatus(int id, [FromBody] string status)
+        {
+            try
+            {
+                await _slotManagementService.UpdateStatus(id, (Status) Enum.Parse(typeof(Status), status));
+                Response.StatusCode = 204;
+            }
+            catch
+            {
+                Response.StatusCode = 500;
+            }
         }
 
         // DELETE: api/ApiWithActions/5
@@ -140,7 +312,11 @@ namespace Presentation.Controllers
         public async Task Delete(int id)
         {
             string imageLink = await _slotManagementService.DeleteSlot(id, Convert.ToInt32(User.FindFirst("Id").Value));
-            System.IO.File.Delete(imageLink.Replace("/", "\\"));
+            if (imageLink != null)
+            {
+                imageLink = Directory.GetCurrentDirectory() + "\\wwwroot" + imageLink;
+                System.IO.File.Delete(imageLink.Replace("/", "\\"));
+            }
         }
     }
 }

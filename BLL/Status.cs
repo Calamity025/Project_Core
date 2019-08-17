@@ -12,7 +12,6 @@ namespace BLL
         {
             Started,
             Finished,
-            Suspended,
             Closed
         }
     }

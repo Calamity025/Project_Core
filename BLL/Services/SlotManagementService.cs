@@ -39,6 +39,9 @@ namespace BLL.Services
             newSlot.Category = category;
             newSlot.SlotTags = tags;
             newSlot.Status = Status.SlotStatus.Started.ToString();
+            newSlot.EndTime = DateTime.UtcNow;
+            newSlot.EndTime = newSlot.EndTime.AddDays(30);
+            newSlot.UserId = seller.Id;
             _db.BetHistories.Create(new BetHistory() { Slot = newSlot, UserId = seller.Id, Price = slotDTO.Price });
             _db.Slots.Create(newSlot);
             seller.PlacedSlots.Add(newSlot);
@@ -56,13 +59,16 @@ namespace BLL.Services
 
         public async Task<string> DeleteSlot(int slotId, int userId)
         {
-            Slot slot = await _db.Slots.GetAsync(slotId);
+            Slot slot = await _db.Slots.GetAll().Where(x => x.Id == slotId).Include(x => x.SlotTags).FirstAsync();
             var user = await _db.UserInfos.GetAsync(userId);
             List<BetHistory> histories = await _db.BetHistories.GetAll().Where(x => x.Slot.Id == slotId).ToListAsync();
             if (slot == null || user == null)
             {
                 throw new NotFoundException();
             }
+
+            slot.SlotTags = null;
+            await _db.SaveChangesAsync();
 
             _db.Slots.Delete(slot);
             user.PlacedSlots.Remove(slot);
@@ -101,61 +107,32 @@ namespace BLL.Services
             }
         }
 
-        public async Task AddTags(int slotId, IEnumerable<int> tagIds)
+        public async Task UpdateGeneralInfo(int slotId, SlotUpdateDTO slotInfo)
         {
-            Slot slot = await _db.Slots.GetAsync(slotId);
+            Slot slot = await _db.Slots.GetAll()
+                .Where(x => x.Id == slotId).Include(x => x.SlotTags)
+                .FirstAsync();
             if (slot == null)
             {
                 throw new NotFoundException();
             }
 
-            ICollection<Tag> tags = await _db.Tags.GetAll().Where(x => tagIds.Contains(x.Id)).ToListAsync();
-            slot.SlotTags = slot.SlotTags.Concat(tags) as ICollection<Tag>;
-            _db.Update(slot);
+            slot.Name = slotInfo.Name ?? slot.Name;
+            slot.Description = slot.Description ?? slot.Description;
 
-            try
+            if (slotInfo.SlotTagIds != null)
             {
-                await _db.SaveChangesAsync();
-            }
-            catch (Exception e)
-            {
-                throw new DatabaseException("Error when updating slot", e);
-            }
-        }
-
-        public async Task RemoveTags(int slotId, IEnumerable<int> tagIds)
-        {
-            Slot slot = await _db.Slots.GetAsync(slotId);
-            if (slot == null)
-            {
-                throw new NotFoundException();
+                var tags = await _db.Tags.GetAll()
+                    .Where(x => slotInfo.SlotTagIds.Contains(x.Id)).ToListAsync();
+                slot.SlotTags = tags;
             }
 
-            IEnumerable<Tag> tags = slot.SlotTags.Where(x => !tagIds.Contains(x.Id));
-
-            slot.SlotTags = tags as ICollection<Tag>;
-            _db.Update(slot);
-
-            try
+            if (slotInfo.CategoryId != -1)
             {
-                await _db.SaveChangesAsync();
+                var category = await _db.Categories.GetAsync(slotInfo.CategoryId);
+                slot.Category = category;
+                slot.CategoryId = category.Id;
             }
-            catch (Exception e)
-            {
-                throw new DatabaseException("Error when updating slot", e);
-            }
-        }
-
-        public async Task UpdateGeneralInfo(int slotId, SlotGeneralInfoDTO slotInfo)
-        {
-            Slot slot = await _db.Slots.GetAsync(slotId);
-            if (slot == null)
-            {
-                throw new NotFoundException();
-            }
-
-            slot.Name = slotInfo.Name;
-            slot.Description = slot.Description;
 
             _db.Update(slot);
             try
@@ -189,50 +166,6 @@ namespace BLL.Services
             }
         }
 
-        public async Task AddToUserFollowingList(int userId, int slotId)
-        {
-            UserInfo user = await _db.UserInfos.GetAsync(userId);
-            Slot slot = await _db.Slots.GetAsync(slotId);
-            if (user == null || slot == null)
-            {
-                throw new NotFoundException();
-            }
-
-            user.FollowingSlots.Add(slot);
-
-            _db.Update(user);
-            try
-            {
-                await _db.SaveChangesAsync();
-            }
-            catch (Exception e)
-            {
-                throw new DatabaseException("Error when adding to following list", e);
-            }
-        }
-
-        public async Task RemoveFromUserFollowingList(int userId, int slotId)
-        {
-            UserInfo user = await _db.UserInfos.GetAsync(userId);
-            Slot slot = await _db.Slots.GetAsync(slotId);
-            if (user == null || slot == null)
-            {
-                throw new NotFoundException();
-            }
-
-            user.FollowingSlots.Remove(slot);
-
-            _db.Update(user);
-            try
-            {
-                await _db.SaveChangesAsync();
-            }
-            catch (Exception e)
-            {
-                throw new DatabaseException("Error when removing from following list", e);
-            }
-        }
-
         public async Task MakeBet(int slotId, int userId, decimal bet)
         {
             var slot = await _db.Slots.GetAsync(slotId);
@@ -262,15 +195,18 @@ namespace BLL.Services
 
         public async Task UndoBet(int slotId, int userId)
         {
-            var bet = await _db.BetHistories.GetAll().FirstOrDefaultAsync(x => x.Slot.Id == slotId && x.UserId == userId);
+            var bets = await _db.BetHistories.GetAll().Where(x => x.Slot.Id == slotId && x.UserId == userId).ToListAsync();
             var user = await _db.UserInfos.GetAsync(userId);
-            if (bet == null || user == null)
+            if (bets == null || user == null)
             {
                 throw new NotFoundException();
             }
 
-            user.BetSlots.Remove(bet.Slot);
-            _db.BetHistories.Delete(bet);
+            foreach (var betHistory in bets)
+            {
+                user.PlacedSlots.Remove(betHistory.Slot);
+                _db.BetHistories.Delete(betHistory);
+            }
 
             try
             {
@@ -278,7 +214,25 @@ namespace BLL.Services
             }
             catch (Exception e)
             {
-                throw new DatabaseException("Error when deleting bet");
+                throw new DatabaseException("Error when deleting bet", e);
+            }
+        }
+
+        public async Task CloseSlots(IEnumerable<Slot> slots)
+        {
+            foreach (var slot in slots)
+            {
+                slot.Status = Status.SlotStatus.Finished.ToString();
+                _db.Update(slot);
+            }
+
+            try
+            {
+                await _db.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                throw new DatabaseException("", e);
             }
         }
 

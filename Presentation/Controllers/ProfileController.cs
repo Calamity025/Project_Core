@@ -36,6 +36,30 @@ namespace Presentation.Controllers
             return "value";
         }
 
+        [Authorize]
+        [HttpGet("followingSlots")]
+        public async Task<int[]> GetFollowingMinimumSlots()
+        {
+            var id = Convert.ToInt32(User.Claims.First(x => x.Type == "Id").Value);
+            try
+            {
+                var slots = await _profileManagementService.GetFollowingSlots(id);
+                Response.StatusCode = 200;
+                return slots.Select(x => x.Id).ToArray();
+            }
+            catch (NotFoundException)
+            {
+                Response.StatusCode = 404;
+                return null;
+            }
+            catch (Exception)
+            {
+                Response.StatusCode = 500;
+                return null;
+            }
+
+        }
+
         // POST: api/Profile
         [Authorize]
         [HttpPost]
@@ -94,6 +118,38 @@ namespace Presentation.Controllers
         [HttpPut("{id}")]
         public void Put(int id, [FromBody] string value)
         {
+        }
+
+        [Authorize]
+        [HttpPut("follow/{id}")]
+        public async Task AddToFollowingList(int id)
+        {
+            var userId = Convert.ToInt32(User.Claims.First(x => x.Type == "Id").Value);
+            try
+            {
+                await _profileManagementService.AddToUserFollowingList(userId, id);
+                Response.StatusCode = 200;
+            }
+            catch
+            {
+                Response.StatusCode = 500;
+            }
+        }
+
+        [Authorize]
+        [HttpPut("unfollow/{id}")]
+        public async Task RemoveFromFollowingList(int id)
+        {
+            var userId = Convert.ToInt32(User.Claims.First(x => x.Type == "Id").Value);
+            try
+            {
+                await _profileManagementService.RemoveFromUserFollowingList(userId, id);
+                Response.StatusCode = 200;
+            }
+            catch
+            {
+                Response.StatusCode = 500;
+            }
         }
 
         // DELETE: api/ApiWithActions/5

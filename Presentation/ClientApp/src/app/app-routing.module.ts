@@ -3,6 +3,8 @@ import { Routes, RouterModule } from '@angular/router';
 import { HomeComponent } from './home/home.component';
 import { ProfileCreationComponent } from './profile-creation/profile-creation.component';
 import { SlotCreationComponent } from './slots/slot-creation/slot-creation.component';
+import { SlotComponent } from './slots/slot/slot.component';
+import { SlotEditComponent } from './slots/slot-edit/slot-edit.component';
 
 
 const routes: Routes = [
@@ -18,6 +20,14 @@ const routes: Routes = [
     {
       path : 'create',
       component : SlotCreationComponent
+    },
+    {
+      path : 'slot/:id',
+      component : SlotComponent
+    },
+    {
+      path : 'edit/:id',
+      component : SlotEditComponent
     }
 ];
 

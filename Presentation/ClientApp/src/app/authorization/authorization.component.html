@@ -1,4 +1,4 @@
-<div *ngIf="!globals.isAuthorized" class="d-flex">
+<div *ngIf="!isAuthorized" class="d-flex">
   <div class="dropdown">
     <button class="btn btn-default" type="button" id="dropdownLogin" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
       Sign in
@@ -32,7 +32,7 @@
     </div>
   </div>
 </div>
-<div *ngIf="globals.isAuthorized" class="d-flex">
+<div *ngIf="isAuthorized" class="d-flex">
   <div>
     <a [href]="currentUser.Id" class="navbar-brand d-flex">
       <img style="height: 30px;" class="d-inline-block align-top rounded-circle" [src]='currentUser.AvatarLink ? currentUser.AvatarLink : "/UserAvatars/defaultUser.png"'>

@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Category } from 'src/app/models/category';
 import { Tag } from 'src/app/models/tag';
-import { SearchService } from '../search.service';
+import { SearchService } from '../../../services/search.service';
+import { AuthService } from 'src/app/services';
+import { User } from 'src/app/models';
 
 @Component({
   selector: 'app-search-property',
@@ -15,11 +17,15 @@ export class SearchComponent implements OnInit {
   newCategoryName? : string;
   selectedCategory? : Category;
   selectedTags? : Tag[] = [];
+  isAuthorized? : boolean;
+  currentUser? : User;
 
-  constructor(private searchService : SearchService) { }
+  constructor(private searchService : SearchService,
+    private authService : AuthService) { }
 
   ngOnInit() {
-    this.searchService.refresh();
+    this.authService.isAuthorized$.subscribe(val => this.isAuthorized = val);
+    this.authService.currentUser$.subscribe(val => this.currentUser = val);
   }
 
   onCategoryClick(){
@@ -33,7 +39,7 @@ export class SearchComponent implements OnInit {
   }
 
   onAddButtonClick(){
-    this.isFormActivated = true;
+    this.isFormActivated = !this.isFormActivated;
   }
 
   onTagAdd(){
@@ -56,18 +62,31 @@ export class SearchComponent implements OnInit {
 
   onCategorySelect(category : Category){
     if(this.selectedCategory == category)
+    {
       this.selectedCategory = null;
+      this.searchService.getSlots();
+    }
     else
+    {
       this.selectedCategory = category;
+      this.searchService.getSlotsByCategory(this.selectedCategory.id);
+    }
   }
 
   onTagSelect(tag : Tag){
     if(this.selectedTags.indexOf(tag) != -1){
       let i = this.selectedTags.indexOf(tag);
       this.selectedTags.splice(i, 1);
+      if(this.selectedTags.length == 0){
+        this.searchService.getSlots();
+      }
+      else{
+        this.searchService.getSlotsByTags(this.selectedTags.map(x => x.id));
+      }
     }
     else{
       this.selectedTags.push(tag);
+      this.searchService.getSlotsByTags(this.selectedTags.map(x => x.id));
     }
   }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using BLL.Interfaces;
 using Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,7 +28,7 @@ namespace Presentation.Controllers
             return await _tagManagementService.GetTagList();
         }
 
-        // POST: api/Tag
+        [Authorize(Roles = "admin")]
         [HttpPost]
         public async Task<Tag> Post([FromBody] Tag tag)
         {
@@ -42,7 +43,7 @@ namespace Presentation.Controllers
             }
         }
 
-        // PUT: api/Tag/5
+        [Authorize(Roles = "admin")]
         [HttpPut("{id}")]
         public async Task<Tag> Put(int id, [FromBody] Tag tag)
         {
@@ -58,7 +59,7 @@ namespace Presentation.Controllers
             }
         }
 
-        // DELETE: api/ApiWithActions/5
+        [Authorize(Roles = "admin")]
         [HttpDelete("{id}")]
         public async Task Delete(int id)
         {

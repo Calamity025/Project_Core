@@ -3,7 +3,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
-import { AuthService, JwtService, ReqResService } from '../app/authorization/services'
+import { AuthService, JwtService, ReqResService } from './services'
 import { AppComponent } from './app.component';
 import { NavMenuComponent } from './nav-menu/nav-menu.component';
 import { HomeComponent } from './home/home.component';
@@ -11,12 +11,12 @@ import { AppRoutingModule } from './app-routing.module';
 import { TokenInterceptor } from './authorization/interceptor/token.interceptor';
 import { ProfileCreationComponent } from './profile-creation/profile-creation.component';
 import { AuthorizationComponent } from './authorization/authorization.component';
-import { Globals } from './Globals.component';
 import { SlotCreationComponent } from './slots/slot-creation/slot-creation.component';
 import { SearchComponent } from './home/search/search-property/search-property.component';
 import { SlotsComponent } from './home/slots/slots/slots.component';
-import { SearchService } from './home/search/search.service';
-import { SlotsService } from './home/slots/slots.service';
+import { SearchService } from './services/search.service';
+import { SlotComponent } from './slots/slot/slot.component';
+import { SlotEditComponent } from './slots/slot-edit/slot-edit.component';
 
 @NgModule({
   declarations: [
@@ -27,7 +27,9 @@ import { SlotsService } from './home/slots/slots.service';
     SlotsComponent,
     ProfileCreationComponent,
     AuthorizationComponent,
-    SlotCreationComponent
+    SlotCreationComponent,
+    SlotComponent,
+    SlotEditComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
@@ -40,8 +42,6 @@ import { SlotsService } from './home/slots/slots.service';
     AuthService,
     JwtService,
     SearchService,
-    SlotsService,
-    Globals,
     { provide: Window, useValue: window },
     {
       provide: HTTP_INTERCEPTORS,

@@ -20,11 +20,14 @@ namespace Entities
         public virtual ICollection<Slot> FollowingSlots { get; set; }
         public virtual ICollection<Slot> BetSlots { get; set; }
         public virtual ICollection<Slot> PlacedSlots { get; set; }
+        public virtual ICollection<Slot> WonSlots { get; set; }
 
         public UserInfo()
         {
             FollowingSlots = new List<Slot>();
             PlacedSlots = new List<Slot>();
+            BetSlots = new List<Slot>();
+            WonSlots = new List<Slot>();
         }
     }
 }

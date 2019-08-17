@@ -10,6 +10,7 @@ namespace Presentation.Models
         public int Id { get; set; }
         public string Name { get; set; }
         public string AvatarLink { get; set; }
-        public bool isAuthorized { get; set; }
+        public IEnumerable<int> FollowingSlots { get; set; }
+        public bool IsAuthorized { get; set; }
     }
 }
