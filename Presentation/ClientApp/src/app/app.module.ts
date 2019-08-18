@@ -9,14 +9,14 @@ import { NavMenuComponent } from './nav-menu/nav-menu.component';
 import { HomeComponent } from './home/home.component';
 import { AppRoutingModule } from './app-routing.module';
 import { TokenInterceptor } from './authorization/interceptor/token.interceptor';
-import { ProfileCreationComponent } from './profile-creation/profile-creation.component';
+import { ProfileCreationComponent } from './profile/profile-creation/profile-creation.component';
 import { AuthorizationComponent } from './authorization/authorization.component';
 import { SlotCreationComponent } from './slots/slot-creation/slot-creation.component';
 import { SearchComponent } from './home/search/search-property/search-property.component';
 import { SlotsComponent } from './home/slots/slots/slots.component';
 import { SearchService } from './services/search.service';
-import { SlotComponent } from './slots/slot/slot.component';
-import { SlotEditComponent } from './slots/slot-edit/slot-edit.component';
+import { ProfileComponent } from './profile/profile/profile.component';
+import { ProfileService } from './services/profile.service';
 
 @NgModule({
   declarations: [
@@ -27,9 +27,7 @@ import { SlotEditComponent } from './slots/slot-edit/slot-edit.component';
     SlotsComponent,
     ProfileCreationComponent,
     AuthorizationComponent,
-    SlotCreationComponent,
-    SlotComponent,
-    SlotEditComponent
+    ProfileComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
@@ -42,6 +40,7 @@ import { SlotEditComponent } from './slots/slot-edit/slot-edit.component';
     AuthService,
     JwtService,
     SearchService,
+    ProfileService,
     { provide: Window, useValue: window },
     {
       provide: HTTP_INTERCEPTORS,

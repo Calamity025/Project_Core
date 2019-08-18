@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -35,7 +36,6 @@ namespace BLL.Services
 
             user.FirstName = profile.FirstName;
             user.LastName = profile.LastName;
-            user.DeliveryAddress = profile.DeliveryAddress;
             _db.Update(user);
 
             try
@@ -151,6 +151,41 @@ namespace BLL.Services
             }
 
             return res;
+        }
+
+        public async Task<ProfileDTO> GetProfile(int id)
+        {
+            var profile = await _db.UserInfos.GetAll().Where(x => x.Id == id)
+                .Include(x => x.FollowingSlots)
+                .Include(x => x.BetSlots)
+                .Include(x => x.PlacedSlots)
+                .Include(x => x.WonSlots)
+                .FirstOrDefaultAsync();
+            if (profile == null)
+            {
+                throw new NotFoundException();
+            }
+
+            ProfileDTO profileDto = _mapper.Map<ProfileDTO>(profile);
+
+            profileDto.FollowingSlots = Map(profile.FollowingSlots);
+            profileDto.BetSlots = Map(profile.BetSlots);
+            profileDto.WonSlots = Map(profile.WonSlots);
+            profileDto.PlacedSlots = Map(profile.PlacedSlots);
+
+            return profileDto;
+        }
+
+        private ICollection<SlotMinimumDTO> Map(IEnumerable<Slot> list)
+        {
+            List<SlotMinimumDTO> slots = new List<SlotMinimumDTO>();
+
+            foreach (var slot in list)
+            {
+                slots.Add(_mapper.Map<SlotMinimumDTO>(slot));
+            }
+
+            return slots;
         }
     }
 }

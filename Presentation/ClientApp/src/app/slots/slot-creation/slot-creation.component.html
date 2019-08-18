@@ -73,7 +73,7 @@
           <textarea class="form-control" maxlength="2048" rows="7" (input)="onDescriptionInput($event.target.value)"></textarea>
       </div>
       <div class="col-12 d-flex">
-        <button type="submit" class="btn btn-success ml-auto align-self-end" (click)="onSubmitClick($event)" [disabled]="buttonIsDisabled">Создать</button>
+        <button type="submit" class="btn btn-success ml-auto align-self-end" (click)="onSubmitClick($event)" [disabled]="!isAuthorized">Создать</button>
       </div>
     </form>
   </div>

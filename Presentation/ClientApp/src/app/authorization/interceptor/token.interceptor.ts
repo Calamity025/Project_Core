@@ -17,7 +17,6 @@ export class TokenInterceptor implements HttpInterceptor {
         if(this.isAuthorized && this.tokenService.isExpired()){
             this.authService.signOut();
             $('#UnauthorizedMessageBox').modal('show');
-            return of(null);
         }
 
         req = req.clone({

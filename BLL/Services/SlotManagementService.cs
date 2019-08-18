@@ -205,6 +205,7 @@ namespace BLL.Services
             foreach (var betHistory in bets)
             {
                 user.PlacedSlots.Remove(betHistory.Slot);
+                _db.Update(user);
                 _db.BetHistories.Delete(betHistory);
             }
 

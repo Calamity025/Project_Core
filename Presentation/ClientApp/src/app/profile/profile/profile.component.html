@@ -1,0 +1,88 @@
+<div>
+  <div class="mx-auto rounded col-10 p-3" style="box-shadow: 0px 0px 10px rgba(0,0,0,0.35)">
+    <div class="d-flex justify-content-end">
+      <div class="px-1">
+        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal" *ngIf="isAuthorized">Удалить</button>
+      </div>
+      <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Удалить аккаунт?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                Вы уверены, что хотите удалить аккаунт?
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Нет</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal" (click)="onDeleteClick()">Удалить</button>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+    <h1 class="display-4 ml-3 mt-4">Ваш профиль: {{currentUser? currentUser.Name : ' '}}</h1>
+    <hr style="border-top: 3px solid rgba(0, 0, 0, 0.1); box-shadow: 0 0 5px rgba(0,0,0,0.15);"/>
+    <div class="d-flex px-0 col-12 d-flex">
+      <div class="col-5 p-2">
+        <img [src]="profile? (profile.imageLink ? profile.imageLink : '/UserAvatars/defaultUser.png') : '/UserAvatars/defaultUser.png'" style="width: 95%;" class="img-thumbnail">
+      </div>
+      <div class="col-7" *ngIf="profile">
+        <div class="col-12 mb-3" style="text-align: center">
+          <span class="h3">{{profile.lastName}} {{profile.firstName}}</span>
+        </div>
+        <div class="list-group col-12">
+          <div id="accordion">
+            <div class="card">
+              <div class="card-header acc btn collapsed" data-toggle="collapse" data-target="#collapseFollowing" aria-expanded="true" aria-controls="collapseFollowing" id="headingFollowing">
+                Отслеживаемые слоты
+              </div>
+              <div id="collapseFollowing" class="collapse" aria-labelledby="headingFollowing" data-parent="#accordion">
+                <div  class="acc card-body d-flex flex-row align-items-center p-0 rounded border-bottom" *ngFor="let slot of profile.followingSlots">
+                  <img [src]="slot.imageLink ? slot.imageLink : '/SlotImages/default.jpg'" class="" style="height: 80px; max-width: 80px;">
+                  <span style="user-select: none" class="ml-5 h5">{{slot.name}}</span>
+                  <button type="button" class="btn btn-sm btn-danger mr-2 ml-auto" (click)="onUnsubscribe(slot)">X</button>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header acc btn collapsed" data-toggle="collapse" data-target="#collapseBet" aria-expanded="true" aria-controls="collapseBet" id="headingBet">
+                  Слоты со ставками
+              </div>
+              <div (click)="onSlotClick(slot)" id="collapseBet" class="collapse" aria-labelledby="headingBet" data-parent="#accordion">
+                <div class="acc card-body d-flex flex-row align-items-center p-0 rounded border-bottom" *ngFor="let slot of profile.betSlots">
+                  <img [src]="slot.imageLink ? slot.imageLink : '/SlotImages/default.jpg'" class="" style="height: 80px; max-width: 80px;">
+                  <span style="user-select: none" class="ml-5 h5">{{slot.name}}</span>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header acc btn collapsed" data-toggle="collapse" data-target="#collapsePlaced" aria-expanded="true" aria-controls="collapsePlaced" id="headingPlaced">
+                  Ваши слоты
+              </div>
+              <div (click)="onSlotClick(slot)" id="collapsePlaced" class="collapse" aria-labelledby="headingPlaced" data-parent="#accordion">
+                <div class="acc card-body d-flex flex-row align-items-center p-0 rounded border-bottom" *ngFor="let slot of profile.placedSlots">
+                  <img [src]="slot.imageLink ? slot.imageLink : '/SlotImages/default.jpg'" class="" style="height: 80px; max-width: 80px;">
+                  <span style="user-select: none" class="ml-5 h5">{{slot.name}}</span>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header acc btn collapsed" data-toggle="collapse" data-target="#collapseWon" aria-expanded="true" aria-controls="collapseWon" id="headingWon">
+                  Выигранные слоты
+              </div>
+              <div (click)="onSlotClick(slot)" id="collapsePlaced" class="collapse" aria-labelledby="headingWon" data-parent="#accordion">
+                <div class="acc card-body d-flex flex-row align-items-center p-0 rounded border-bottom" *ngFor="let slot of profile.wonSlots">
+                  <img [src]="slot.imageLink ? slot.imageLink : '/SlotImages/default.jpg'" class="" style="height: 80px; max-width: 80px;">
+                  <span style="user-select: none" class="ml-5 h5">{{slot.name}}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  </div>
+</div>

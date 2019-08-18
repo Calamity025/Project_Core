@@ -1,10 +1,12 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { HomeComponent } from './home/home.component';
-import { ProfileCreationComponent } from './profile-creation/profile-creation.component';
+import { ProfileCreationComponent } from './profile/profile-creation/profile-creation.component';
 import { SlotCreationComponent } from './slots/slot-creation/slot-creation.component';
 import { SlotComponent } from './slots/slot/slot.component';
 import { SlotEditComponent } from './slots/slot-edit/slot-edit.component';
+import { SlotModule } from './slots/slot.module';
+import { ProfileComponent } from './profile/profile/profile.component';
 
 
 const routes: Routes = [
@@ -18,16 +20,12 @@ const routes: Routes = [
       component : HomeComponent
     },
     {
-      path : 'create',
-      component : SlotCreationComponent
+      path : 'slot',
+      loadChildren: () => import('./slots/slot.module').then(m => m.SlotModule)
     },
     {
-      path : 'slot/:id',
-      component : SlotComponent
-    },
-    {
-      path : 'edit/:id',
-      component : SlotEditComponent
+      path : 'profile',
+      component : ProfileComponent
     }
 ];
 

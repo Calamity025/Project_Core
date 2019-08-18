@@ -7,6 +7,7 @@ import { Slot } from 'src/app/models/slot';
 import { FormGroup, FormBuilder } from '@angular/forms';
 import { Category } from 'src/app/models/category';
 import { Tag } from 'src/app/models/tag';
+import { User } from 'src/app/models';
 
 export interface SlotUpdate{
   Name : string,
@@ -36,6 +37,7 @@ export class SlotEditComponent implements OnInit {
   isTagsValid : boolean = true;
   description? : string;
   title? : string;
+  currentUser? : User;
 
 
   constructor(private route: ActivatedRoute,
@@ -56,6 +58,7 @@ export class SlotEditComponent implements OnInit {
     this.uploadForm = this.formBuilder.group({
       profile: ['']
     });
+    this.authService.currentUser$.subscribe(val => this.currentUser = val);
     if(this.searchService.tags.length == 0 || this.searchService.categories.length == 0) {
       this.searchService.refresh();
     }
@@ -104,7 +107,7 @@ export class SlotEditComponent implements OnInit {
   }
 
   onBackClick(){
-    this.router.navigate(['/slot' + this.slotId]);
+    this.router.navigate(['/slot/' + this.slotId]);
   }
 
   onSubmitClick(){

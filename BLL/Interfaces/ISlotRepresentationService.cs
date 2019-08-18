@@ -10,15 +10,15 @@ namespace BLL.Interfaces
 {
     public interface ISlotRepresentationService : IDisposable
     {
-        Task<IEnumerable<SlotMinimumDTO>> GetPage(int pageNumber, int slotsOnPage);
+        Task<Page> GetPage(int pageNumber, int slotsOnPage);
         Task<SlotFullDTO> GetSlot(int id);
         Task<decimal> GetSlotPrice(int id);
         Task<decimal> GetUserBet(int id, int userId);
-        Task<IEnumerable<SlotMinimumDTO>> GetByCategory(int categoryId, 
+        Task<Page> GetByCategory(int categoryId, 
             int pageNumber, int slotsOnPage);
-        Task<IEnumerable<SlotMinimumDTO>> GetByTags(IEnumerable<int> tagIds, 
+        Task<Page> GetByTags(IEnumerable<int> tagIds, 
             int pageNumber, int slotsOnPage);
-        Task<IEnumerable<SlotMinimumDTO>> GetByName(string query, int pageNumber, 
+        Task<Page> GetByName(string query, int pageNumber, 
             int slotsOnPage);
         Task<IEnumerable<SlotMinimumDTO>> GetUserFollowingSlots(int userId);
         Task<IEnumerable<SlotMinimumDTO>> GetUserSlots(int userId);

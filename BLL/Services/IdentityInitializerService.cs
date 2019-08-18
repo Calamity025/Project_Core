@@ -3,17 +3,22 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using BLL.DTO;
+using BLL.Interfaces;
 using DAL.Interfaces;
 using Entities;
 using Entities.Identity;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BLL.Services
 {
     public class IdentityInitializerService
     {
-        public static async Task InitializeAsync(IIdentityUnitOfWork db)
+        public static async Task InitializeAsync(IServiceProvider services)
         {
+            var identityService = services.GetService<IIdentityService>();
+            var db = services.GetService<IIdentityUnitOfWork>();
             string adminEmail = "vp5gor@gmail.com";
             string password = "sudoLogin_1";
             if (await db.RoleManager.FindByNameAsync("admin") == null)
@@ -26,14 +31,10 @@ namespace BLL.Services
             }
             if (await db.UserManager.FindByNameAsync("root") == null)
             {
-                User admin = new User { UserName = "root", Email = adminEmail};
-                IdentityResult result = await db.UserManager.CreateAsync(admin, password);
-                if (result.Succeeded)
-                {
-                    await db.UserManager.AddClaimAsync(admin, new Claim(ClaimsIdentity.DefaultNameClaimType, admin.UserName));
-                    await db.UserManager.AddClaimAsync(admin, new Claim("Id", admin.Id.ToString()));
-                    await db.UserManager.AddToRoleAsync(admin, "admin");
-                }
+                var user = new IdentityCreationDTO()
+                    {Email = adminEmail, Password = password, UserName = "root"};
+                await identityService.Register(user);
+                await identityService.AddToRoleAsync(user.UserName, "admin");
             }
         }
     }

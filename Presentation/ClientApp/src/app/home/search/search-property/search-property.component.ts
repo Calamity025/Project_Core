@@ -26,6 +26,8 @@ export class SearchComponent implements OnInit {
   ngOnInit() {
     this.authService.isAuthorized$.subscribe(val => this.isAuthorized = val);
     this.authService.currentUser$.subscribe(val => this.currentUser = val);
+    this.searchService.selectedCategory.subscribe(val => this.selectedCategory = val);
+    this.searchService.selectedTags.subscribe(val => this.selectedTags = val);
   }
 
   onCategoryClick(){
@@ -44,12 +46,12 @@ export class SearchComponent implements OnInit {
 
   onTagAdd(){
     this.searchService.createTag(this.newTagName)
-    .subscribe(() => {this.searchService.refreshTags(); this.isFormActivated = false;});
+      .subscribe(() => {this.searchService.refreshTags(); this.isFormActivated = false;});
   }
 
   onCategoryAdd(){
     this.searchService.createCategory(this.newCategoryName)
-    .subscribe(() => {this.searchService.refreshCategories(); this.isFormActivated = false; });
+      .subscribe(() => {this.searchService.refreshCategories(); this.isFormActivated = false; });
   }
 
   onCategoryNameInput(value : string) {
@@ -63,12 +65,13 @@ export class SearchComponent implements OnInit {
   onCategorySelect(category : Category){
     if(this.selectedCategory == category)
     {
-      this.selectedCategory = null;
+      this.searchService.selectedCategory.next(null);
       this.searchService.getSlots();
     }
     else
     {
-      this.selectedCategory = category;
+      this.searchService.selectedTags.next([]);
+      this.searchService.selectedCategory.next(category);
       this.searchService.getSlotsByCategory(this.selectedCategory.id);
     }
   }
@@ -77,6 +80,7 @@ export class SearchComponent implements OnInit {
     if(this.selectedTags.indexOf(tag) != -1){
       let i = this.selectedTags.indexOf(tag);
       this.selectedTags.splice(i, 1);
+      this.searchService.selectedTags.next(this.selectedTags);
       if(this.selectedTags.length == 0){
         this.searchService.getSlots();
       }
@@ -86,6 +90,8 @@ export class SearchComponent implements OnInit {
     }
     else{
       this.selectedTags.push(tag);
+      this.searchService.selectedCategory.next(null);
+      this.searchService.selectedTags.next(this.selectedTags);
       this.searchService.getSlotsByTags(this.selectedTags.map(x => x.id));
     }
   }

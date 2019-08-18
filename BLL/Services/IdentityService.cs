@@ -19,12 +19,14 @@ namespace BLL.Services
         private readonly IDataUnitOfWork _db;
         private readonly IIdentityUnitOfWork _identity;
         private readonly IMapper _mapper;
+        private readonly ISlotManagementService _slotManagementService;
 
-        public IdentityService(IDataUnitOfWork db, IIdentityUnitOfWork identity, IMapper mapper)
+        public IdentityService(IDataUnitOfWork db, IIdentityUnitOfWork identity, IMapper mapper, ISlotManagementService slotManagementService)
         {
             _db = db;
             _identity = identity;
             _mapper = mapper;
+            _slotManagementService = slotManagementService;
         }
 
         public async Task<UserDTO> Register(IdentityCreationDTO identityCreation)
@@ -80,12 +82,48 @@ namespace BLL.Services
             res.AvatarLink = info.ImageLink;
             res.FollowingSlots = info.FollowingSlots.Select(x => x.Id);
             res.Roles = await _identity.UserManager.GetRolesAsync(user);
+            res.Balance = info.Balance;
             return res;
         }
 
-        public async Task AddToRole(int id, string roleName)
+        public async Task AddToRole(string name, string roleName)
         {
 
+        }
+
+        public async Task DeleteIdentity(string name)
+        {
+            User user = await _identity.UserManager.FindByNameAsync(name);
+
+            var slots = await _db.Slots.GetAll().Where(x => x.UserId == user.Id).ToListAsync();
+            foreach (var slot in slots)
+            {
+                await _slotManagementService.DeleteSlot(slot.Id, user.Id);
+            }
+
+            var info = await _db.UserInfos.GetAll().Where(x => x.Id == user.Id)
+                .Include(x => x.FollowingSlots)
+                .Include(x => x.BetSlots)
+                .Include(x => x.PlacedSlots)
+                .Include(x => x.WonSlots)
+                .FirstOrDefaultAsync();
+            info.BetSlots = null;
+            info.FollowingSlots = null;
+            info.PlacedSlots = null;
+            info.WonSlots = null;
+            _db.UserInfos.Delete(info);
+            await _db.SaveChangesAsync();
+
+            await _identity.UserManager.DeleteAsync(user);
+        }
+
+        public async Task AddToRoleAsync(string userName, string role)
+        {
+            var user = await _identity.UserManager.FindByNameAsync(userName);
+            if (user != null)
+            {
+                await _identity.UserManager.AddToRoleAsync(user, role);
+            }
         }
 
         bool disposed = false;

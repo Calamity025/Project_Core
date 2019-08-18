@@ -8,15 +8,25 @@
       </div>
   </div>
   <div class="col-4 d-flex justify-content-start">
-    <button type="button" class="btn btn-outline-primary" (click)="router.navigate(['/create'])" *ngIf="isAuthorized">Cоздать слот</button>
+    <button type="button" class="btn btn-outline-primary" (click)="router.navigate(['/slot/create'])" *ngIf="isAuthorized">Cоздать слот</button>
   </div>
 </div>
 <div class="d-flex flex-wrap align-items-start col-12 p-4">
-  <h3 *ngIf="searchService.selectedSlots.length == 0">Ничего не найдено</h3>
-  <div class="slot border rounded m-2 p-2 px-1" style="width: 13rem; overflow: hidden;" *ngFor="let slot of searchService.selectedSlots" (click)="onSlotClick(slot)">
+  <h3 *ngIf="!slots || slots.length == 0">Ничего не найдено</h3>
+  <div class="slot border rounded m-2 p-2 px-1" style="width: 13rem; overflow: hidden;" *ngFor="let slot of slots" (click)="onSlotClick(slot)">
     <img [src]="slot.imageLink ? slot.imageLink : '/SlotImages/default.jpg'" style="height: 200px;" class="img-thumbnail mx-auto d-block mb-2">
     <div style="text-align: center">
       <span style="user-select: none">{{slot.name}}</span>
     </div>
   </div>
 </div>
+<nav aria-label="Page navigation example">
+    <ul class="pagination justify-content-center">
+      <li class="page-item" (click)="previous()" [class.disabled]="searchService.page - 1 < 1">
+        <a class="page-link" style="user-select: none">Previous</a>
+      </li>
+      <li class="page-item" (click)="next()" [class.disabled]="searchService.page + 1 > searchService.numberOfPages">
+        <a class="page-link" style="user-select: none">Next</a>
+      </li>
+    </ul>
+  </nav>

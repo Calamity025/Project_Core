@@ -6,9 +6,9 @@
         <label class="control-label" for="inputStatus">Название</label>
         <input class="form-control" [value]="slot.name" (input)="onTitleInput($event.target.value)">
       </div>
-      <div class="input-group ml-3 my-2">
+      <div class="input-group ml-3 my-2"  *ngIf="currentUser ? currentUser.Role : false">
         <div class="input-group-prepend ">
-          <label class="input-group-text" for="StatusSelect" *ngIf="currentUser.Role">Статус</label>
+          <label class="input-group-text" for="StatusSelect">Статус</label>
         </div>
         <select id="StatusSelect" class="custom-select" [(ngModel)]="selectedStatus" [ngModelOptions]="{standalone: true}">
           <option selected>
@@ -85,8 +85,8 @@
       </div>
       <div class="p-2">
         <div class="col-12 d-flex justify-content-end">
-          <button type="button" class="btn btn-secondary mr-2" (click)="onBackClick()">Отменить</button>
-          <button type="submit" class="btn btn-success" (click)="onSubmitClick()">Сохранить</button>
+          <button type="button" class="btn btn-secondary mr-2" (click)="onBackClick()" >Отменить</button>
+          <button type="submit" class="btn btn-success" [disabled]="!isAuthorized" (click)="onSubmitClick()">Сохранить</button>
         </div>
       </div>
     </div>

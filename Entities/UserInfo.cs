@@ -13,7 +13,6 @@ namespace Entities
         public User User { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public string DeliveryAddress { get; set; }
         [DefaultValue(0)]
         public decimal Balance { get; set; }
         public string ImageLink { get; set; }

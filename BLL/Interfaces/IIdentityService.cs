@@ -13,5 +13,7 @@ namespace BLL.Interfaces
         Task<UserDTO> Register(IdentityCreationDTO identity);
         Task<ClaimsIdentity> Login(LoginInfo info, string authType);
         Task<UserDTO> GetCurrentUser(string name);
+        Task DeleteIdentity(string name);
+        Task AddToRoleAsync(string userName, string role);
     }
 }

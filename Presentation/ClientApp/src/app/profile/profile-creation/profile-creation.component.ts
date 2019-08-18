@@ -1,8 +1,8 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { ProfileModel } from '../models/ProfileModel';
-import { AuthService } from '../services';
+import { ProfileModel } from '../../models/ProfileModel';
+import { AuthService } from '../../services';
 import { Router } from '@angular/router';
 
 @Component({

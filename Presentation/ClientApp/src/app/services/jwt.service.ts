@@ -14,8 +14,6 @@ export class JwtService {
   public persistToken(jwtBase64String: string): void {
     this.token.raw = jwtBase64String;
     this.token.payload = this.createFromString(jwtBase64String);
-    console.log('token string parsed and saved to local storage');
-    console.log(this.token);
     this.window.localStorage.setItem('rawToken', jwtBase64String);
   }
 

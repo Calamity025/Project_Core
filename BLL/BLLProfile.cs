@@ -21,6 +21,7 @@ namespace BLL
             CreateMap<User, UserDTO>()
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(x => x.UserName));
             CreateMap<ProfileCreationDTO, UserInfo>();
+            CreateMap<UserInfo, ProfileDTO>();
         }
     }
 }

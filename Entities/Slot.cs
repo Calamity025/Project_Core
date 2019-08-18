@@ -8,6 +8,7 @@ namespace Entities
         public int Id { get; set; }
         public string Name { get; set; }
         public int UserId { get; set; }
+        public User User { get; set; }
         public decimal MinBet { get; set; }
         public DateTime EndTime { get; set; }
         public string Status { get; set; }

@@ -28,6 +28,7 @@ export class SlotCreationComponent implements OnInit {
   step? : number;
   description? : string;
   isTagsValid : boolean = true;
+  isAuthorized? = false;
   
   constructor(private formBuilder: FormBuilder,
     private searchService : SearchService,
@@ -35,11 +36,7 @@ export class SlotCreationComponent implements OnInit {
     private router : Router,
     private authService : AuthService) {
       authService.isAuthorized$.subscribe(
-        val => {
-        if(!val){
-          router.navigate(['/']);
-        }
-      });
+        val => this.isAuthorized = val);
      }
 
   ngOnInit() {
@@ -69,20 +66,22 @@ export class SlotCreationComponent implements OnInit {
       description : this.description
     }
 
-    this.httpClient.post<any>('https://localhost:44324/api/Slot', slot)
+    this.httpClient.post<number>('https://localhost:44324/api/Slot', slot)
       .subscribe(val => {
-        if(this.uploadForm.get('profile').value){
+        if(val && this.uploadForm.get('profile').value){
           const formData = new FormData();
           formData.append('file', this.uploadForm.get('profile').value);
           this.httpClient.post<any>('https://localhost:44324/api/Slot/image/' + val, formData)
           .subscribe(val => {
             if(val){
               this.router.navigate(['/']);
+              this.searchService.getSlots();
               }
             })
         }
-        else{
+        else if(val){
           this.router.navigate(['/']);
+          this.searchService.getSlots();
         }
     });
   }

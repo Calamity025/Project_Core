@@ -11,6 +11,7 @@ namespace BLL.DTO
         public string AvatarLink { get; set; }
         public IEnumerable<int> FollowingSlots { get; set; }
         public IEnumerable<string> Roles { get; set; }
+        public decimal Balance { get; set; }
     }
 }
 

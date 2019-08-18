@@ -95,5 +95,12 @@ namespace Presentation.Controllers
             await Response.WriteAsync(JsonConvert.SerializeObject(response,
                 new JsonSerializerSettings {Formatting = Formatting.Indented}));
         }
+
+        [Authorize]
+        [HttpDelete]
+        public async Task Delete()
+        { 
+            await _identityService.DeleteIdentity(User.Identity.Name);
+        }
     }
 }

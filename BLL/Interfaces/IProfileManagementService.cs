@@ -15,5 +15,6 @@ namespace BLL.Interfaces
         Task AddToUserFollowingList(int userId, int slotId);
         Task RemoveFromUserFollowingList(int userId, int slotId);
         Task<IEnumerable<SlotMinimumDTO>> GetFollowingSlots(int userId);
+        Task<ProfileDTO> GetProfile(int id);
     }
 }

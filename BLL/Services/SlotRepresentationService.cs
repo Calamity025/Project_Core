@@ -25,18 +25,23 @@ namespace BLL.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<SlotMinimumDTO>> GetPage(int pageNumber, 
+        public async Task<Page> GetPage(int pageNumber, 
             int slotsOnPage)
         {
             var slots = await _db.Slots.GetAll().Where(x => x.Status.Equals(Status.SlotStatus.Started.ToString()))
                 .OrderBy(x => x.Id).Skip(--pageNumber * slotsOnPage).Take(slotsOnPage).ToListAsync();
+            var count = await _db.Slots.GetAll().Where(x => x.Status.Equals(Status.SlotStatus.Started.ToString()))
+                .CountAsync();
+
             List<SlotMinimumDTO> page = new List<SlotMinimumDTO>();
             foreach (var slot in slots)
             {
                 page.Add(_mapper.Map<SlotMinimumDTO>(slot));
             }
 
-            return page;
+            int numberOfPages = (count % slotsOnPage) > 0 ? (count / slotsOnPage + 1) : (count / slotsOnPage);
+
+            return new Page(){NumberOfPages = numberOfPages, Slots = page};
         }
 
         public async Task<SlotFullDTO> GetSlot(int id)
@@ -91,53 +96,66 @@ namespace BLL.Services
             }
             catch
             {
-                throw new NotFoundException();
+                return -1;
             }
         }
 
-        public async Task<IEnumerable<SlotMinimumDTO>> GetByCategory(int categoryId, 
+        public async Task<Page> GetByCategory(int categoryId, 
             int pageNumber, int slotsOnPage)
         {
             IEnumerable<Slot> slots = await _db.Slots.GetAll().Where(x => x.CategoryId.Equals(categoryId) && x.Status.Equals(Status.SlotStatus.Started.ToString()))
                 .OrderBy(x => x.Id).Skip(--pageNumber * slotsOnPage).Take(slotsOnPage).ToListAsync();
-            List<SlotMinimumDTO> page = new List<SlotMinimumDTO>();
+            var count = await _db.Slots.GetAll().Where(x => x.CategoryId.Equals(categoryId) && x.Status.Equals(Status.SlotStatus.Started.ToString()))
+                .CountAsync();
 
+            List<SlotMinimumDTO> page = new List<SlotMinimumDTO>();
             foreach (var slot in slots)
             {
                 page.Add(_mapper.Map<SlotMinimumDTO>(slot));
             }
 
-            return page;
+            int numberOfPages = (count % slotsOnPage) > 0 ? (count / slotsOnPage + 1) : (count / slotsOnPage);
+
+            return new Page(){NumberOfPages = numberOfPages, Slots = page};
         }
 
-        public async Task<IEnumerable<SlotMinimumDTO>> GetByTags(IEnumerable<int> tagIds, int pageNumber,
+        public async Task<Page> GetByTags(IEnumerable<int> tagIds, int pageNumber,
             int slotsOnPage)
         {
-            IEnumerable<Slot> slots = await _db.Slots.GetAll().Where(x => x.SlotTags.Any(z => tagIds.Contains(z.Id)) && x.Status.Equals(Status.SlotStatus.Started.ToString()))
+            IEnumerable<Slot> slots = await _db.Slots.GetAll()
+                .Where(slot => tagIds.All(id => slot.SlotTags.Any(tag => tag.Id == id)) && slot.Status.Equals(Status.SlotStatus.Started.ToString()))
                 .OrderBy(x => x.Id).Skip(--pageNumber * slotsOnPage).Take(slotsOnPage).ToListAsync();
-            List<SlotMinimumDTO> page = new List<SlotMinimumDTO>();
+            var count = await _db.Slots.GetAll().Where(slot => tagIds.All(id => slot.SlotTags.Any(tag => tag.Id == id)) && slot.Status.Equals(Status.SlotStatus.Started.ToString()))
+                .CountAsync();
 
+            List<SlotMinimumDTO> page = new List<SlotMinimumDTO>();
             foreach (var slot in slots)
             {
                 page.Add(_mapper.Map<SlotMinimumDTO>(slot));
             }
 
-            return page;
+            int numberOfPages = (count % slotsOnPage) > 0 ? (count / slotsOnPage + 1) : (count / slotsOnPage);
+
+            return new Page() { NumberOfPages = numberOfPages, Slots = page };
         }
 
-        public async Task<IEnumerable<SlotMinimumDTO>> GetByName(string query, 
+        public async Task<Page> GetByName(string query, 
             int pageNumber, int slotsOnPage)
         {
             IEnumerable<Slot> slots = await _db.Slots.GetAll().Where(x => x.Name.Contains(query) && x.Status.Equals(Status.SlotStatus.Started.ToString()))
                 .OrderBy(x => x.Id).Skip(--pageNumber * slotsOnPage).Take(slotsOnPage).ToListAsync();
-            List<SlotMinimumDTO> page = new List<SlotMinimumDTO>();
+            var count = await _db.Slots.GetAll().Where(x => x.Name.Contains(query) && x.Status.Equals(Status.SlotStatus.Started.ToString()))
+                .CountAsync();
 
+            List<SlotMinimumDTO> page = new List<SlotMinimumDTO>();
             foreach (var slot in slots)
             {
                 page.Add(_mapper.Map<SlotMinimumDTO>(slot));
             }
 
-            return page;
+            int numberOfPages = (count % slotsOnPage) > 0 ? (count / slotsOnPage + 1) : (count / slotsOnPage);
+
+            return new Page() { NumberOfPages = numberOfPages, Slots = page };
         }
 
         public async Task<IEnumerable<SlotMinimumDTO>> GetUserFollowingSlots(int userId)

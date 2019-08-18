@@ -9,9 +9,11 @@ using BLL.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace Presentation.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ProfileController : ControllerBase
@@ -22,21 +24,24 @@ namespace Presentation.Controllers
         {
             _profileManagementService = profileManagementService;
         }
-        // GET: api/Profile
+
         [HttpGet]
-        public IEnumerable<string> Get()
+        public async Task<ProfileDTO> Get()
         {
-            return new string[] { "value1", "value2" };
+            var id = Convert.ToInt32(User.Claims.First(x => x.Type == "Id").Value);
+            try
+            {
+                var profile = await _profileManagementService.GetProfile(id);
+                Response.StatusCode = 200;
+                return profile;
+            }
+            catch
+            {
+                Response.StatusCode = 404;
+                return null;
+            }
         }
 
-        // GET: api/Profile/5
-        [HttpGet("{id}", Name = "Get")]
-        public string Get(int id)
-        {
-            return "value";
-        }
-
-        [Authorize]
         [HttpGet("followingSlots")]
         public async Task<int[]> GetFollowingMinimumSlots()
         {
@@ -60,8 +65,6 @@ namespace Presentation.Controllers
 
         }
 
-        // POST: api/Profile
-        [Authorize]
         [HttpPost]
         public async Task Post([FromBody] ProfileCreationDTO profile)
         {
@@ -77,7 +80,6 @@ namespace Presentation.Controllers
             }
         }
 
-        [Authorize]
         [HttpPost]
         [Route("image")]
         public async Task Post(IFormFile file)
@@ -114,13 +116,6 @@ namespace Presentation.Controllers
 
         }
 
-        // PUT: api/Profile/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        [Authorize]
         [HttpPut("follow/{id}")]
         public async Task AddToFollowingList(int id)
         {
@@ -136,7 +131,6 @@ namespace Presentation.Controllers
             }
         }
 
-        [Authorize]
         [HttpPut("unfollow/{id}")]
         public async Task RemoveFromFollowingList(int id)
         {
@@ -150,12 +144,6 @@ namespace Presentation.Controllers
             {
                 Response.StatusCode = 500;
             }
-        }
-
-        // DELETE: api/ApiWithActions/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
         }
     }
 }

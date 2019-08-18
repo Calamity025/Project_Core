@@ -42,7 +42,6 @@ export class AuthorizationComponent implements OnInit {
       login: this.login,
       password: this.password
     };
-    console.log(user);
     this.authService.signIn(user);
   }
 

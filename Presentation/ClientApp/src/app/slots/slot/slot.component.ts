@@ -58,7 +58,14 @@ export class SlotComponent implements OnInit {
   }
 
   updateUserBet(){
-    this.searchService.getUserBet(this.slotId).subscribe(val => this.userBet = val);
+    this.searchService.getUserBet(this.slotId).subscribe(val => {
+      if(val){
+        this.userBet = parseInt(val);
+      }
+      else{
+        this.userBet = null;
+      }
+    });
   }
 
   onBackClick(){
@@ -90,6 +97,7 @@ export class SlotComponent implements OnInit {
     .subscribe(() => {
       this.isMakeBetClicked = false;
       this.searchService.updatePrice(this.slotId).subscribe(val => this.slot.price = val);
+      this.updateUserBet();
     });
   }
 
@@ -124,6 +132,14 @@ export class SlotComponent implements OnInit {
   }
 
   onEditClick(){
-    this.router.navigate(['/edit/' + this.slotId])
+    this.router.navigate(['/slot/edit/' + this.slotId])
+  }
+
+  onUndoBet(){
+    this.httpClient.delete<any>('https://localhost:44324/api/Slot/undoBets/' + this.slotId)
+      .subscribe(val =>{
+        this.searchService.updatePrice(this.slotId).subscribe(val => this.slot.price = val);
+        this.updateUserBet();
+      } )
   }
 }

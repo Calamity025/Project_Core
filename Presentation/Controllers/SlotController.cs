@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -33,7 +34,7 @@ namespace Presentation.Controllers
         // GET: api/Slot
         [HttpGet]
         [Route("page/{id:int}&{itemsOnPage}")]
-        public async Task<IEnumerable<SlotMinimumDTO>> GetPage(int id, int itemsOnPage)
+        public async Task<Page> GetPage(int id, int itemsOnPage)
         {
             if (id < 1)
             {
@@ -42,11 +43,6 @@ namespace Presentation.Controllers
             }
 
             var slotPage = await _slotRepresentationService.GetPage(id, itemsOnPage);
-            if (!slotPage.Any())
-            {
-                Response.StatusCode = 404;
-                return null;
-            }
 
             return slotPage;
         }
@@ -85,20 +81,18 @@ namespace Presentation.Controllers
 
         [Authorize]
         [HttpGet("{id}/userBet")]
-        public async Task<decimal> GetUserBet(int id)
+        public async Task GetUserBet(int id)
         {
             var userId = Convert.ToInt32(User.Claims.First(x => x.Type == "Id").Value);
-            try
+            var res = await _slotRepresentationService.GetUserBet(id, userId);
+            if (res == -1)
             {
-                var res = await _slotRepresentationService.GetUserBet(id, userId);
-                Response.StatusCode = 200;
-                return res;
+                return;
             }
-            catch
-            {
-                Response.StatusCode = 404;
-                return -1;
-            }
+
+            Response.StatusCode = 200;
+            await Response.WriteAsync(JsonConvert.SerializeObject(res,
+                new JsonSerializerSettings {Formatting = Formatting.Indented}));
         }
 
         // POST: api/Slot
@@ -158,7 +152,7 @@ namespace Presentation.Controllers
         }
 
         [HttpPost("byCategory/{page}&{itemsOnPage}")]
-        public async Task<IEnumerable<SlotMinimumDTO>> GetSlotsByCategory(int page, int itemsOnPage, [FromBody]int id)
+        public async Task<Page> GetSlotsByCategory(int page, int itemsOnPage, [FromBody]int id)
         {
             if (id < 0)
             {
@@ -167,39 +161,24 @@ namespace Presentation.Controllers
             }
 
             var slots = await _slotRepresentationService.GetByCategory(id, page, itemsOnPage);
-            if (!slots.Any())
-            {
-                Response.StatusCode = 404;
-                return null;
-            }
 
             Response.StatusCode = 200;
             return slots;
         }
 
         [HttpPost("byTags/{page}&{itemsOnPage}")]
-        public async Task<IEnumerable<SlotMinimumDTO>> GetSlotsByTags(int page, int itemsOnPage, [FromBody]int[] ids)
+        public async Task<Page> GetSlotsByTags(int page, int itemsOnPage, [FromBody]int[] ids)
         {
             var slots = await _slotRepresentationService.GetByTags(ids, page, itemsOnPage);
-            if (!slots.Any())
-            {
-                Response.StatusCode = 404;
-                return null;
-            }
 
             Response.StatusCode = 200;
             return slots;
         }
 
         [HttpPost("byName/{page}&{itemsOnPage}")]
-        public async Task<IEnumerable<SlotMinimumDTO>> GetSlotsByName(int page, int itemsOnPage, [FromBody]string name)
+        public async Task<Page> GetSlotsByName(int page, int itemsOnPage, [FromBody]string name)
         {
             var slots = await _slotRepresentationService.GetByName(name, page, itemsOnPage);
-            if (!slots.Any())
-            {
-                Response.StatusCode = 404;
-                return null;
-            }
 
             Response.StatusCode = 200;
             return slots;

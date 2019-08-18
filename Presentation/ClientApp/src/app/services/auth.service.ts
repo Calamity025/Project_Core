@@ -47,11 +47,12 @@ export class AuthService {
     }
   
     public getCurrentUser() {    
-      this.httpClient.get<User>('https://localhost:44324/Account/Current')
-      .subscribe(x => {
-        this.currentUser$.next(x);
-        this.isAuthorized$.next(true);
-        console.log(x);
-      });
+      if(!this.jwtService.isExpired()){
+        this.httpClient.get<User>('https://localhost:44324/Account/Current')
+        .subscribe(x => {
+          this.currentUser$.next(x);
+          this.isAuthorized$.next(true);
+        });
+      }
     }
 }

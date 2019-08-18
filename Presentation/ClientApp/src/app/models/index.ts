@@ -3,3 +3,4 @@ export * from './jwt-payload';
 export * from './user';
 export * from './userLoginResponse';
 export * from './userRegistrationModel'
+export * from './Profile';

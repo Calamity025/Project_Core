@@ -62,7 +62,7 @@
           <span class="lead pr-3">Продавец: </span>
           <img [src]="slot.user.avatarLink ? slot.user.avatarLink : '/UserAvatars/defaultUser.png' " class="rounded-circle" style="height: 20px">
           <a>
-            {{slot.user.userName}}
+            {{slot.user.name}}
           </a>
         </div>
         <div class="p-2 d-flex flex-column justify-content-center align-items-center" style="height: 100%">
@@ -80,8 +80,9 @@
               </small>
             </div>
           </div>
-          <div class="my-2" *ngIf="userBet" style="text-align: center">
+          <div class="my-2" *ngIf="userBet && !isSeller" style="text-align: center">
               <span class="lead">Ваша ставка: {{userBet | number:'1.2-2'}} UAH</span>
+              <button type="button" class="btn btn-danger btn-sm ml-2" (click)="onUndoBet()">Отменить ставку</button>
           </div>
           <div class="my-2" style="text-align: center">
               <span class="lead">Шаг ставки: {{slot.step | number:'1.2-2'}} UAH</span>

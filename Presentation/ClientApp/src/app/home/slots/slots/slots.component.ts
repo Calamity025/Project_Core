@@ -13,6 +13,7 @@ import { AuthService } from 'src/app/services';
 })
 export class SlotsComponent implements OnInit {
   isAuthorized? : boolean;
+  slots : slotMinimum[] = [];
 
   constructor(private router : Router,
     private authService : AuthService,
@@ -21,6 +22,7 @@ export class SlotsComponent implements OnInit {
 
   ngOnInit() {
     this.authService.isAuthorized$.subscribe(val => this.isAuthorized = val);
+    this.searchService.selectedSlots.subscribe(val => this.slots = val);
   }
 
   ngAfterViewInit(): void {
@@ -37,5 +39,13 @@ export class SlotsComponent implements OnInit {
 
   onSlotClick(slot : slotMinimum){
     this.router.navigate(['slot/' + slot.id]);
+  }
+
+  next(){
+    this.searchService.next();
+  }
+
+  previous(){
+    this.searchService.previous();
   }
 }

@@ -25,7 +25,7 @@ namespace BLL
 
         public static async Task InitializeIdentityInitializer(IServiceProvider services)
         {
-            await IdentityInitializerService.InitializeAsync(services.GetService<IIdentityUnitOfWork>());
+            await IdentityInitializerService.InitializeAsync(services);
         }
     }
 }
