@@ -1,7 +1,8 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { AuthService, ReqResService } from '../services';
 import { Router } from '@angular/router';
 import { User, LoginModel, UserRegistrationModel } from '../models';
+import { AuthService } from '../services';
+declare var $:any;
 
 @Component({
   selector: 'app-authorization',
@@ -15,6 +16,7 @@ export class AuthorizationComponent implements OnInit {
   password? : string;
   login? : string;
   email? : string;
+  summ? : number;
 
   constructor(private authService: AuthService, 
     private cdRef: ChangeDetectorRef,
@@ -33,6 +35,10 @@ export class AuthorizationComponent implements OnInit {
 
   onPasswordInput(value: string) {
     this.password = value;
+  }
+
+  onValueInput(value : number){
+    this.summ = value;
   }
 
   onLoginClick() {
@@ -73,6 +79,12 @@ export class AuthorizationComponent implements OnInit {
       this.router.navigate(["/register/profile"]); 
       this.authService.isAuthorized$.next(true);
       }
-    })
+    },
+    err => alert(err.error))
+  }
+
+  onAddMoneyClick(){
+    this.authService.addMoney(this.summ);
+    $('#dropdownBalance').dropdown('toggle');
   }
 }

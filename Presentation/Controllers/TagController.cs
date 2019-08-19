@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using AutoMapper;
 using BLL.Interfaces;
 using Entities;
 using Microsoft.AspNetCore.Authorization;
@@ -16,46 +15,52 @@ namespace Presentation.Controllers
     {
         private readonly ITagManagementService _tagManagementService;
 
-        public TagController(ITagManagementService tagManagementService)
-        {
+        public TagController(ITagManagementService tagManagementService) =>
             _tagManagementService = tagManagementService;
-        }
 
-        // GET: api/Tag
         [HttpGet]
-        public async Task<IEnumerable<Tag>> Get()
-        {
-            return await _tagManagementService.GetTagList();
-        }
+        public async Task<IEnumerable<Tag>> Get() =>
+            await _tagManagementService.GetTagList();
 
         [Authorize(Roles = "admin")]
         [HttpPost]
-        public async Task<Tag> Post([FromBody] Tag tag)
+        public async Task Post([FromBody] string tagName)
         {
+            if (string.IsNullOrEmpty(tagName) || tagName.Length > 25)
+            {
+                Response.StatusCode = 400;
+                await Response.WriteAsync("Tag name should be between 0 and 25 characters");
+                return;
+            }
             try
             {
-                return await _tagManagementService.CreateTag(tag);
+                await _tagManagementService.CreateTag(tagName);
+                Response.StatusCode = 201;
             }
             catch
             {
                 Response.StatusCode = 500;
-                return null;
             }
         }
 
         [Authorize(Roles = "admin")]
         [HttpPut("{id}")]
-        public async Task<Tag> Put(int id, [FromBody] Tag tag)
+        public async Task Put(int id, [FromBody] string tagName)
         {
-            tag.Id = id;
+            if (string.IsNullOrEmpty(tagName) || tagName.Length > 25)
+            {
+                Response.StatusCode = 400;
+                await Response.WriteAsync("Tag name should be between 0 and 25 characters");
+                return;
+            }
             try
             {
-                return await _tagManagementService.UpdateTag(tag);
+                await _tagManagementService.UpdateTag(id, tagName);
+                Response.StatusCode = 204;
             }
             catch
             {
                 Response.StatusCode = 500;
-                return null;
             }
         }
 
@@ -63,6 +68,12 @@ namespace Presentation.Controllers
         [HttpDelete("{id}")]
         public async Task Delete(int id)
         {
+            if (id <= 0)
+            {
+                Response.StatusCode = 400;
+                await Response.WriteAsync("Tag id cannot be 0 or lower");
+                return;
+            }
             try
             {
                 await _tagManagementService.DeleteTag(id);

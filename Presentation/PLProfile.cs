@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using BLL.DTO;
 using Presentation.Models;
 
@@ -15,7 +10,10 @@ namespace Presentation
         {
             CreateMap<SlotCreationModel, SlotCreationDTO>();
             CreateMap<UserRegistrationModel, IdentityCreationDTO>()
-                .ForMember(src=>src.UserName, opt => opt.MapFrom(x=>x.Login));
+                .ForMember(src=>src.UserName, 
+                    opt => opt.MapFrom(x=>x.Login));
+            CreateMap<LoginInfoModel, LoginInfoDTO>();
+            CreateMap<ProfileCreationModel, ProfileCreationDTO>();
         }
     }
 }

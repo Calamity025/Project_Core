@@ -1,15 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 using DAL.Interfaces;
 using Entities;
-using Entities.Identity;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace DAL
 {
@@ -45,13 +37,10 @@ namespace DAL
                 _userManager.Dispose();
                 _roleManager.Dispose();
             }
-
             disposed = true;
         }
 
-        ~IdentityUnitOfWork()
-        {
+        ~IdentityUnitOfWork() =>
             Dispose(false);
-        }
     }
 }

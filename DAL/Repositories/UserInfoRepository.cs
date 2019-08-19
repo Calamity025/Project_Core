@@ -1,44 +1,30 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using DAL.Interfaces;
 using Entities;
-using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Repositories
 {
     public class UserInfoRepository : IUserInfoRepository
     {
-        private IDbContext _context;
+        private readonly IDbContext _context;
 
-        public UserInfoRepository(IDbContext context)
-        {
+        public UserInfoRepository(IDbContext context) =>
             _context = context;
-        }
 
-        public IQueryable<UserInfo> GetAll()
-        {
-            return _context.UserInfos;
-        }
+        public IQueryable<UserInfo> GetAll() =>
+            _context.UserInfos;
 
-        public UserInfo Get(int id)
-        {
-            return _context.UserInfos.Find(id);
-        }
+        public UserInfo Get(int id) =>
+            _context.UserInfos.Find(id);
 
-        public async Task<UserInfo> GetAsync(int id)
-        {
-            return await _context.UserInfos.FindAsync(id);
-        }
+        public async Task<UserInfo> GetAsync(int id) =>
+            await _context.UserInfos.FindAsync(id);
 
-        public void Create(UserInfo item)
-        {
+        public void Create(UserInfo item) =>
             _context.UserInfos.Add(item);
-        }
 
-        public void Delete(UserInfo info)
-        {
+        public void Delete(UserInfo info) =>
            _context.UserInfos.Remove(info);
-        }
     }
 }

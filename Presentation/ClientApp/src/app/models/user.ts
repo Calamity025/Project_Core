@@ -1,8 +1,9 @@
 export class User {
-    Id: string;
-    Name: string;
-    AvatarLink: string;
-    FollowingSlots : string[] = [];
-    IsAuthorized : boolean;
-    Roles : string[] = [];
+    id: string;
+    name: string;
+    avatarLink: string;
+    followingSlots : string[] = [];
+    isAuthorized : boolean;
+    roles : string[] = [];
+    balance : number;
 }

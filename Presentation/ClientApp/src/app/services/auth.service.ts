@@ -4,7 +4,7 @@ import { catchError } from 'rxjs/operators';
 import { User } from '../models/user';
 import { LoginModel } from '../models/login-model';
 import { JwtService } from './jwt.service';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { UserLoginResponse } from '../models/userLoginResponse';
 import { UserRegistrationModel } from '../models';
 
@@ -12,9 +12,11 @@ import { UserRegistrationModel } from '../models';
 export class AuthService {
   isAuthorized$ = new BehaviorSubject<boolean>(false);
   currentUser$ = new BehaviorSubject<User>(null);
+  private currentUser : User;
 
   constructor(private httpClient: HttpClient,
     private jwtService: JwtService) { 
+      this.currentUser$.subscribe(val => this.currentUser = val);
     }
   
     public signIn(loginModel: LoginModel) {
@@ -24,10 +26,7 @@ export class AuthService {
           this.jwtService.persistToken(val.access_token);
           this.getCurrentUser();
         },
-        catchError(error => {
-          alert(error);
-          return of(null);
-        })
+        err => alert(err.error)
     );
     }
   
@@ -50,9 +49,22 @@ export class AuthService {
       if(!this.jwtService.isExpired()){
         this.httpClient.get<User>('https://localhost:44324/Account/Current')
         .subscribe(x => {
+          
+        console.log(x);
           this.currentUser$.next(x);
           this.isAuthorized$.next(true);
-        });
+        },
+        err => alert(err.error));
       }
+    }
+
+    public addMoney(value: number){
+      this.httpClient.put<string>('https://localhost:44324/Account/addMoney', `"${value}"`, 
+      { headers: new HttpHeaders({'Content-Type': 'application/json'})})
+      .subscribe(val => {
+        this.currentUser.balance = parseFloat(val);
+        this.currentUser$.next(this.currentUser);
+      },
+      err => alert(err.error))
     }
 }

@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Reflection.Metadata;
-using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using BLL.DTO;
@@ -28,19 +25,19 @@ namespace BLL.Services
         public async Task<Page> GetPage(int pageNumber, 
             int slotsOnPage)
         {
-            var slots = await _db.Slots.GetAll().Where(x => x.Status.Equals(Status.SlotStatus.Started.ToString()))
+            var slots = await _db.Slots.GetAll()
+                .Where(x => x.Status.Equals(Status.SlotStatus.Started.ToString()))
                 .OrderBy(x => x.Id).Skip(--pageNumber * slotsOnPage).Take(slotsOnPage).ToListAsync();
-            var count = await _db.Slots.GetAll().Where(x => x.Status.Equals(Status.SlotStatus.Started.ToString()))
+            var count = await _db.Slots.GetAll()
+                .Where(x => x.Status.Equals(Status.SlotStatus.Started.ToString()))
                 .CountAsync();
-
             List<SlotMinimumDTO> page = new List<SlotMinimumDTO>();
             foreach (var slot in slots)
             {
                 page.Add(_mapper.Map<SlotMinimumDTO>(slot));
             }
-
-            int numberOfPages = (count % slotsOnPage) > 0 ? (count / slotsOnPage + 1) : (count / slotsOnPage);
-
+            int numberOfPages = 
+                (count % slotsOnPage) > 0 ? (count / slotsOnPage + 1) : (count / slotsOnPage);
             return new Page(){NumberOfPages = numberOfPages, Slots = page};
         }
 
@@ -50,72 +47,75 @@ namespace BLL.Services
                 .Include(x => x.SlotTags)
                 .Include(x=> x.Category)
                 .FirstOrDefaultAsync();
-
             if (slot == null)
             {
                 throw new NotFoundException();
             }
-
             var user = await _db.UserInfos.GetAsync(slot.UserId);
-
             if (user == null)
             {
                 throw new NotFoundException();
             }
-
-            decimal price = await _db.BetHistories.GetAll()
+            var history = await _db.BetHistories.GetAll()
                 .Where(x => x.Slot.Id == id)
-                .MaxAsync(x => x.Price);
+                .OrderByDescending(x => x.Price)
+                .FirstOrDefaultAsync();
             var slotDTO = _mapper.Map<SlotFullDTO>(slot);
-            slotDTO.Price = price;
-            slotDTO.User = new UserDTO()
+            slotDTO.Price = history?.Price;
+            slotDTO.User = new UserDTO
             {
                 Id = user.Id,
                 AvatarLink = user.ImageLink,
                 Name = (!string.IsNullOrEmpty(user.LastName) && !string.IsNullOrEmpty(user.FirstName)) ?
                     (user.LastName + " " + user.FirstName) : "anonymous"
             };
-
             return slotDTO;
         }
 
         public async Task<decimal> GetSlotPrice(int id)
         {
-            return await _db.BetHistories.GetAll()
+            var slot = await _db.BetHistories.GetAll()
                 .Where(x => x.Slot.Id == id)
-                .MaxAsync(x => x.Price);
+                .OrderByDescending(x => x.Price)
+                .FirstOrDefaultAsync();
+            if (slot == null)
+            {
+                throw new NotFoundException();
+            }
+            return slot.Price;
         }
 
         public async Task<decimal> GetUserBet(int id, int userId)
         {
-            try
+            var slot = await _db.BetHistories.GetAll()
+                .Where(x => x.Slot.Id == id && x.UserId == userId)
+                .OrderByDescending(x => x.Price )
+                .FirstOrDefaultAsync();
+            if (slot == null)
             {
-                return await _db.BetHistories.GetAll()
-                    .Where(x => x.Slot.Id == id && x.UserId == userId)
-                    .MaxAsync(x => x.Price);
+                throw new NotFoundException();
             }
-            catch
-            {
-                return -1;
-            }
+            return slot.Price;
         }
 
         public async Task<Page> GetByCategory(int categoryId, 
             int pageNumber, int slotsOnPage)
         {
-            IEnumerable<Slot> slots = await _db.Slots.GetAll().Where(x => x.CategoryId.Equals(categoryId) && x.Status.Equals(Status.SlotStatus.Started.ToString()))
+            IEnumerable<Slot> slots = await _db.Slots.GetAll()
+                .Where(x => x.CategoryId.Equals(categoryId) && 
+                            x.Status.Equals(Status.SlotStatus.Started.ToString()))
                 .OrderBy(x => x.Id).Skip(--pageNumber * slotsOnPage).Take(slotsOnPage).ToListAsync();
-            var count = await _db.Slots.GetAll().Where(x => x.CategoryId.Equals(categoryId) && x.Status.Equals(Status.SlotStatus.Started.ToString()))
+            var count = await _db.Slots.GetAll()
+                .Where(x => x.CategoryId.Equals(categoryId) && 
+                            x.Status.Equals(Status.SlotStatus.Started.ToString()))
                 .CountAsync();
-
             List<SlotMinimumDTO> page = new List<SlotMinimumDTO>();
             foreach (var slot in slots)
             {
                 page.Add(_mapper.Map<SlotMinimumDTO>(slot));
             }
-
-            int numberOfPages = (count % slotsOnPage) > 0 ? (count / slotsOnPage + 1) : (count / slotsOnPage);
-
+            int numberOfPages = 
+                (count % slotsOnPage) > 0 ? (count / slotsOnPage + 1) : (count / slotsOnPage);
             return new Page(){NumberOfPages = numberOfPages, Slots = page};
         }
 
@@ -123,103 +123,47 @@ namespace BLL.Services
             int slotsOnPage)
         {
             IEnumerable<Slot> slots = await _db.Slots.GetAll()
-                .Where(slot => tagIds.All(id => slot.SlotTags.Any(tag => tag.Id == id)) && slot.Status.Equals(Status.SlotStatus.Started.ToString()))
-                .OrderBy(x => x.Id).Skip(--pageNumber * slotsOnPage).Take(slotsOnPage).ToListAsync();
-            var count = await _db.Slots.GetAll().Where(slot => tagIds.All(id => slot.SlotTags.Any(tag => tag.Id == id)) && slot.Status.Equals(Status.SlotStatus.Started.ToString()))
+                .Where(slot => tagIds.All(id => slot.SlotTags.Any(tag => tag.Id == id)) && 
+                                slot.Status.Equals(Status.SlotStatus.Started.ToString()))
+                .OrderBy(x => x.Id).Skip(--pageNumber * slotsOnPage)
+                .Take(slotsOnPage).ToListAsync();
+            var count = await _db.Slots.GetAll()
+                .Where(slot => tagIds.All(id => slot.SlotTags.Any(tag => tag.Id == id)) && 
+                                slot.Status.Equals(Status.SlotStatus.Started.ToString()))
                 .CountAsync();
-
             List<SlotMinimumDTO> page = new List<SlotMinimumDTO>();
             foreach (var slot in slots)
             {
                 page.Add(_mapper.Map<SlotMinimumDTO>(slot));
             }
-
-            int numberOfPages = (count % slotsOnPage) > 0 ? (count / slotsOnPage + 1) : (count / slotsOnPage);
-
+            int numberOfPages = 
+                (count % slotsOnPage) > 0 ? (count / slotsOnPage + 1) : (count / slotsOnPage);
             return new Page() { NumberOfPages = numberOfPages, Slots = page };
         }
 
         public async Task<Page> GetByName(string query, 
             int pageNumber, int slotsOnPage)
         {
-            IEnumerable<Slot> slots = await _db.Slots.GetAll().Where(x => x.Name.Contains(query) && x.Status.Equals(Status.SlotStatus.Started.ToString()))
+            IEnumerable<Slot> slots = await _db.Slots.GetAll()
+                .Where(x => x.Name.Contains(query) && x.Status.Equals(Status.SlotStatus.Started.ToString()))
                 .OrderBy(x => x.Id).Skip(--pageNumber * slotsOnPage).Take(slotsOnPage).ToListAsync();
-            var count = await _db.Slots.GetAll().Where(x => x.Name.Contains(query) && x.Status.Equals(Status.SlotStatus.Started.ToString()))
+            var count = await _db.Slots.GetAll()
+                .Where(x => x.Name.Contains(query) && x.Status.Equals(Status.SlotStatus.Started.ToString()))
                 .CountAsync();
-
             List<SlotMinimumDTO> page = new List<SlotMinimumDTO>();
             foreach (var slot in slots)
             {
                 page.Add(_mapper.Map<SlotMinimumDTO>(slot));
             }
-
-            int numberOfPages = (count % slotsOnPage) > 0 ? (count / slotsOnPage + 1) : (count / slotsOnPage);
-
+            int numberOfPages = 
+                (count % slotsOnPage) > 0 ? (count / slotsOnPage + 1) : (count / slotsOnPage);
             return new Page() { NumberOfPages = numberOfPages, Slots = page };
-        }
-
-        public async Task<IEnumerable<SlotMinimumDTO>> GetUserFollowingSlots(int userId)
-        {
-            UserInfo user = await _db.UserInfos.GetAsync(userId);
-            List<SlotMinimumDTO> slots = new List<SlotMinimumDTO>();
-
-            foreach (var userFollowingSlot in user.FollowingSlots)
-            {
-                slots.Add(_mapper.Map<SlotMinimumDTO>(userFollowingSlot));
-            }
-
-            return slots;
-        }
-
-        public async Task<IEnumerable<SlotMinimumDTO>> GetUserSlots(int userId)
-        {
-            UserInfo user = await _db.UserInfos.GetAsync(userId);
-            List<SlotMinimumDTO> slots = new List<SlotMinimumDTO>();
-
-            foreach (var userSlot in user.PlacedSlots) 
-            {
-                slots.Add(_mapper.Map<SlotMinimumDTO>(userSlot));
-            }
-
-            return slots;
-        }
-
-        public async Task<string> GetSlotImage(int id)
-        {
-            Slot slot = await _db.Slots.GetAsync(id);
-            return slot.ImageLink;
         }
 
         public async Task<IEnumerable<Slot>> GetExpiredSlots()
         {
             return await _db.Slots.GetAll()
-                .Where(x => x.EndTime <= DateTime.UtcNow && !x.Status.Equals("finished")).ToListAsync();
-        }
-
-        bool disposed = false;
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposed)
-                return;
-
-            if (disposing)
-            {
-                _db.Dispose();
-            }
-
-            disposed = true;
-        }
-
-        ~SlotRepresentationService()
-        {
-            Dispose(false);
+                .Where(x => x.EndTime <= DateTime.Now && !x.Status.Equals("finished")).ToListAsync();
         }
     }
 }

@@ -18,8 +18,6 @@
     <input name="FirstName" type="text" class="form-control" id="FirstName" placeholder="FirstName" (input)="onFirstNameInput($event.target.value)"/><br>
     <label for="inputLastName3" class="control-label">Введите Вашу фамилию</label>
     <input name="LastName" type="text" class="form-control" id="LastName" placeholder="LastName" (input)="onLastNameInput($event.target.value)"/><br>
-    <label for="inputAddress3" class="control-label">Введите адресс доставки</label>
-    <input name="Address" type="text" class="form-control" id="Address" placeholder="Address" (input)="onAddressInput($event.target.value)"/><br>
     <button type="submit" class="btn btn-success align-self-end" (click)="onSubmitClick($event)" 
     [disabled]="buttonIsDisabled">Submit</button>
   </div>

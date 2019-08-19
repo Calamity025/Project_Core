@@ -17,27 +17,46 @@
   </div>
   <div class="border-top p-3">
     <div *ngIf="isSwitcherOn">
-      <div class="categories py-2 pl-2" style="overflow: hidden" *ngFor="let category of searchService.categories" (click)="onCategorySelect(category)" [class.selected]="category == selectedCategory">
-        <span style="user-select: none">{{category.name}}</span>
+      <div class="d-flex flex-row" *ngFor="let category of searchService.categories">
+        <div class="categories mr-auto p-3" style="overflow: hidden; position: relative; width: 100%" (click)="!isEditCategoryOn ? onCategorySelect(category) : null" [class.selected]="category == selectedCategory">
+          <span *ngIf="!isEditCategoryOn || editCategory != category" style="user-select: none">{{category.name}}</span>
+          <div class="input-group mt-3" *ngIf="isEditCategoryOn && editCategory == category">
+            <input type="text" class="form-control" placeholder="Название" (input)="onCategoryEditNameInput($event.target.value)">
+            <div class="input-group-append">
+              <button class="btn btn-outline-secondary" type="button" (click)="onCategoryEdit()">Обновить</button>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="btn my-2" *ngIf="!isEditCategoryOn && currentUser ? currentUser.roles.includes('admin') : false" (click)="onEditCategoryOn(category)">Edit</button>
       </div>
       <div *ngIf="isFormActivated">
         <div class="input-group mt-3">
-            <input type="text" class="form-control" placeholder="Название" (input)="onCategoryNameInput($event.target.value)">
-            <div class="input-group-append">
-              <button class="btn btn-outline-secondary" type="button" (click)="onCategoryAdd($event)">Создать</button>
-            </div>
+          <input type="text" class="form-control" placeholder="Название" (input)="onCategoryNameInput($event.target.value)">
+          <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="button" (click)="onCategoryAdd($event)">Создать</button>
           </div>
+        </div>
       </div>
-      <a (click)="onAddButtonClick($event)" *ngIf="isAuthorized && currentUser.Roles.includes('admin')">
+      <a (click)="onAddButtonClick($event)" *ngIf="isAuthorized && currentUser.roles.includes('admin')">
           <div class="p-2 border rounded mt-3" style="text-align: center;position: relative; overflow: hidden">
             <span class="text-center" style="user-select: none">Создать новую</span>
           </div>
         </a>
     </div>
     <div *ngIf="!isSwitcherOn">
-        <div class="tags py-2 pl-2" style="overflow: hidden" *ngFor="let tag of searchService.tags" (click)="onTagSelect(tag)" [class.selected]="selectedTags.indexOf(tag) != -1">
-            <span style="user-select: none">{{tag.name}}</span>
+      <div class="d-flex flex-row" *ngFor="let tag of searchService.tags" >
+        <div class="tags mr-auto p-3" style="overflow: hidden; position: relative; width: 100%" (click)="!isEditTagOn ? onTagSelect(tag) : null" [class.selected]="selectedTags.indexOf(tag) != -1">
+          <span *ngIf="!isEditTagOn || editTag != tag"  style="user-select: none">{{tag.name}}</span>
+          <div class="input-group mt-3" *ngIf="isEditTagOn && editTag == tag">
+            <input type="text" class="form-control" placeholder="Название" (input)="onTagEditNameInput($event.target.value)">
+            <div class="input-group-append">
+              <button class="btn btn-outline-secondary" type="button" (click)="onTagEdit()">Обновить</button>
+            </div>
           </div>
+        </div>
+        <button type="button" class="btn my-2"  *ngIf="!isEditTagOn && currentUser ? currentUser.roles.includes('admin') : false" (click)="onEditTagOn(tag)">Edit</button>
+        <button type="button" class="btn btn-danger my-2" *ngIf="currentUser ? currentUser.roles.includes('admin') : false" (click)="onDeleteTag(tag)">X</button>
+      </div>
       <div *ngIf="isFormActivated">
         <div class="input-group mt-3">
           <input type="text" class="form-control" placeholder="Название" (input)="onTagNameInput($event.target.value)">
@@ -46,7 +65,7 @@
           </div>
         </div>
       </div>
-      <a (click)="onAddButtonClick($event)" *ngIf="isAuthorized && currentUser.Roles.includes('admin')">
+      <a (click)="onAddButtonClick($event)" *ngIf="isAuthorized && currentUser.roles.includes('admin')">
         <div class="p-2 border rounded mt-3" style="text-align: center;position: relative">
           <span class="text-center" style="user-select: none; overflow: hidden">Создать новый</span>
         </div>

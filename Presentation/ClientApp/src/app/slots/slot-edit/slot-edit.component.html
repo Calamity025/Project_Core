@@ -6,23 +6,23 @@
         <label class="control-label" for="inputStatus">Название</label>
         <input class="form-control" [value]="slot.name" (input)="onTitleInput($event.target.value)">
       </div>
-      <div class="input-group ml-3 my-2"  *ngIf="currentUser ? currentUser.Role : false">
+      <div class="input-group ml-3 my-2"  *ngIf="currentUser ? currentUser.roles.includes('admin') : false">
         <div class="input-group-prepend ">
           <label class="input-group-text" for="StatusSelect">Статус</label>
         </div>
         <select id="StatusSelect" class="custom-select" [(ngModel)]="selectedStatus" [ngModelOptions]="{standalone: true}">
           <option selected>
-            started
+            Started
           </option>
           <option>
-            finished
+            Finished
           </option>
           <option>
-            closed
+            Closed
           </option>
         </select>
         <div class="input-group-append">
-          <button type="button" class="btn btn-success" for="StatusSelect">Сохранить</button>
+          <button type="button" class="btn btn-success" for="StatusSelect" (click)="onChangeStatusClick()">Сохранить</button>
         </div>
       </div>
     </div>

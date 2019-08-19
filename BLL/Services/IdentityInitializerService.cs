@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 using BLL.DTO;
 using BLL.Interfaces;
 using DAL.Interfaces;
 using Entities;
-using Entities.Identity;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BLL.Services
@@ -34,7 +29,7 @@ namespace BLL.Services
                 var user = new IdentityCreationDTO()
                     {Email = adminEmail, Password = password, UserName = "root"};
                 await identityService.Register(user);
-                await identityService.AddToRoleAsync(user.UserName, "admin");
+                await identityService.AddToRole(user.UserName, "admin");
             }
         }
     }

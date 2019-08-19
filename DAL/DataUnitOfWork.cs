@@ -1,26 +1,22 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using DAL.Interfaces;
 using DAL.Repositories;
-using Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace DAL
 {
     public class DataUnitOfWork : IDataUnitOfWork
     {
-        private IDbContext _context;
+        private readonly IDbContext _context;
         private ISlotRepository _slotRepository;
         private IUserInfoRepository _userInfoRepository;
         private ITagRepository _tagRepository;
         private ICategoryRepository _categoryRepository;
         private IBetHistoryRepository _betHistoryRepository;
 
-        public DataUnitOfWork(IDbContext context)
-        {
+        public DataUnitOfWork(IDbContext context) =>
             _context = context;
-        }
 
         public ISlotRepository Slots => 
             _slotRepository ?? (_slotRepository = new SlotRepository(_context));
@@ -33,20 +29,14 @@ namespace DAL
         public IBetHistoryRepository BetHistories =>
             _betHistoryRepository ?? (_betHistoryRepository = new BetHistoryRepository(_context));
 
-        public void Update(object item)
-        {
+        public void Update(object item) =>
             _context.Entry(item).State = EntityState.Modified;
-        }
 
-        public void SaveChanges()
-        {
+        public void SaveChanges() =>
             _context.SaveChanges();
-        }
 
-        public async Task SaveChangesAsync()
-        {
+        public async Task SaveChangesAsync() =>
             await _context.SaveChangesAsync();
-        }
 
         bool disposed = false;
         
@@ -65,13 +55,10 @@ namespace DAL
             {
                 _context.Dispose();
             }
-
             disposed = true;
         }
 
-        ~DataUnitOfWork()
-        {
+        ~DataUnitOfWork() =>
             Dispose(false);
-        }
     }
 }

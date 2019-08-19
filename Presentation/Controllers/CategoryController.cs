@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using AutoMapper;
 using BLL.Interfaces;
 using Entities;
 using Microsoft.AspNetCore.Authorization;
@@ -16,46 +15,61 @@ namespace Presentation.Controllers
     {
         private readonly ICategoryManagementService _categoryManagementService;
 
-        public CategoryController(ICategoryManagementService categoryManagementService)
-        {
+        public CategoryController(ICategoryManagementService categoryManagementService) =>
             _categoryManagementService = categoryManagementService;
-        }
 
-        // GET: api/Category
         [HttpGet]
-        public async Task<IEnumerable<Category>> Get()
-        {
-            return await _categoryManagementService.GetCategoryList();
-        }
+        public async Task<IEnumerable<Category>> Get() =>
+            await _categoryManagementService.GetCategoryList();
 
         [Authorize(Roles = "admin")]
         [HttpPost]
-        public async Task<Category> Post([FromBody] Category category)
+        public async Task Post([FromBody] string categoryName)
         {
+            if (string.IsNullOrEmpty(categoryName) || categoryName.Length > 25)
+            {
+                Response.StatusCode = 400;
+                await Response.WriteAsync("Category name should be between 0 and 25 characters");
+            }
             try
             {
-                return await _categoryManagementService.CreateCategory(category);
+                await _categoryManagementService.CreateCategory(categoryName);
+                Response.StatusCode = 201;
             }
             catch
             {
                 Response.StatusCode = 500;
-                return null;
             }
         }
 
         [Authorize(Roles = "admin")]
         [HttpPut("{id}")]
-        public async Task<Category> Put(int id, [FromBody] Category category)
+        public async Task Put(int id, [FromBody] string categoryName)
         {
-            category.Id = id;
+            if (string.IsNullOrEmpty(categoryName) || categoryName.Length > 25)
+            {
+                Response.StatusCode = 400;
+                await Response.WriteAsync("Category name should be between 0 and 25 characters");
+            }
             try
             {
-                return await _categoryManagementService.UpdateCategory(category);
+                await _categoryManagementService.UpdateCategory(id, categoryName);
+                Response.StatusCode = 204;
             }
             catch
             {
                 Response.StatusCode = 500;
-                return null;
+            }
+        }
+
+        private async Task WriteErrors()
+        {
+            foreach (var modelStateValue in ModelState.Values)
+            {
+                foreach (var error in modelStateValue.Errors)
+                {
+                    await Response.WriteAsync(error.ErrorMessage);
+                }
             }
         }
     }

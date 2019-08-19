@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using Entities;
 
 namespace BLL.DTO
@@ -8,7 +7,8 @@ namespace BLL.DTO
     public class SlotFullDTO
     {
         public string Name { get; set; }
-        public decimal Price { get; set; }
+        public decimal StarterPrice { get; set; }
+        public decimal? Price { get; set; }
         public decimal Step { get; set; }
         public DateTime EndTime { get; set; }
         public string Status { get; set; }

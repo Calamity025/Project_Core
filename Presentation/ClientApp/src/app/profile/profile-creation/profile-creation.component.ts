@@ -13,7 +13,6 @@ import { Router } from '@angular/router';
 export class ProfileCreationComponent implements OnInit {
   firstName? : string;
   lastName? : string;
-  deliveryAddress? : string;
   previewLink = '';
   fileName = "Choose file";
   uploadForm: FormGroup;  
@@ -45,29 +44,26 @@ export class ProfileCreationComponent implements OnInit {
     this.lastName = value;
   }
 
-  onAddressInput(value: string) {
-    this.deliveryAddress = value;
-  }
-
   onSubmitClick() {
     this.isLoading = true;
 
     const user : ProfileModel = {
       FirstName : this.firstName,
-      LastName : this.lastName,
-      DeliveryAddress : this.deliveryAddress
+      LastName : this.lastName
     };
 
     this.httpClient.post<any>('https://localhost:44324/api/Profile/', user)
-      .subscribe(() =>
-        this.router.navigate(["/"]));
+      .subscribe(() =>{
+          this.router.navigate(["/"]);
+          this.authService.getCurrentUser();
+        },
+        err => alert(err.error));
 
     if(this.uploadForm.get('profile').value){
       const formData = new FormData();
       formData.append('file', this.uploadForm.get('profile').value);
       this.httpClient.post<any>('https://localhost:44324/api/Profile/image', formData).subscribe(
-        (res) => console.log(res),
-        (err) => console.log(err)
+        err => alert(err.error)
       );
     }
   }

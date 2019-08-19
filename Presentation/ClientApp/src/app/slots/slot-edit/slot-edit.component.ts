@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SearchService } from 'src/app/services/search.service';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from 'src/app/services';
 import { Slot } from 'src/app/models/slot';
 import { FormGroup, FormBuilder } from '@angular/forms';
@@ -39,7 +39,6 @@ export class SlotEditComponent implements OnInit {
   title? : string;
   currentUser? : User;
 
-
   constructor(private route: ActivatedRoute,
     private router : Router,
     private searchService : SearchService,
@@ -54,11 +53,12 @@ export class SlotEditComponent implements OnInit {
       this.selectedTags = this.slot.slotTags;
       this.currentCount = this.slot.slotTags.length;
       this.selectedCategory = this.slot.category;
-    })
+    },
+    err => alert(err.error))
     this.uploadForm = this.formBuilder.group({
       profile: ['']
     });
-    this.authService.currentUser$.subscribe(val => this.currentUser = val);
+    this.authService.currentUser$.subscribe(val => {this.currentUser = val; alert(this.currentUser)});
     if(this.searchService.tags.length == 0 || this.searchService.categories.length == 0) {
       this.searchService.refresh();
     }
@@ -128,12 +128,14 @@ export class SlotEditComponent implements OnInit {
             if(val){
               this.router.navigate(['/slot/'+this.slotId]);
               }
-            })
+            },
+            err => alert(err.error))
         }
         else{
           this.router.navigate(['/slot/'+this.slotId]);
         }
-    });
+    },
+    err => alert(err.error));
   }
 
   onDescriptionInput(value : string){
@@ -142,5 +144,13 @@ export class SlotEditComponent implements OnInit {
 
   onTitleInput(title : string){
     this.title = title;
+  }
+
+  onChangeStatusClick(){
+    this.httpClient.put<any>('https://localhost:44324/api/Slot/' + this.slotId + '/status', `"${this.selectedStatus}"`, 
+    { headers: new HttpHeaders({'Content-Type': 'application/json'})}).subscribe(() => this.searchService.getSlot(this.slotId).subscribe(val => {
+      this.slot = val;},
+      err => alert(err.error)),
+      err => alert(err.error));
   }
 }

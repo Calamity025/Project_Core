@@ -3,7 +3,7 @@
     <button class="btn btn-default" type="button" id="dropdownLogin" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
       Sign in
     </button>
-    <div class="dropdown-menu dropdown-menu-right mt-2" aria-labelledby="dropdown">
+    <div class="dropdown-menu dropdown-menu-right mt-2" aria-labelledby="dropdownLogin">
       <form class=" d-flex flex-column justify-content-center px-2">
         <label for="inputLogin3" class="control-label">Введите логин</label>
         <input name="Login" type="text" class="form-control" id="loginL" placeholder="Login" (input)="onLoginInput($event.target.value)"/><br>
@@ -35,9 +35,20 @@
 <div *ngIf="isAuthorized" class="d-flex">
   <div>
     <a [routerLink]="['/profile']" class="navbar-brand d-flex">
-      <img style="height: 30px;" class="d-inline-block align-top rounded-circle" [src]="currentUser ? (currentUser.AvatarLink ? currentUser.AvatarLink : '/UserAvatars/defaultUser.png') : '/UserAvatars/defaultUser.png'">
-      <p class="lead mb-0 ml-1">{{currentUser ? currentUser.Name : ' '}}</p>
+      <img style="height: 30px;" class="d-inline-block align-top rounded-circle" [src]="currentUser ? (currentUser.avatarLink ? currentUser.avatarLink : '/UserAvatars/defaultUser.png') : '/UserAvatars/defaultUser.png'">
+      <p class="lead mb-0 ml-1">{{currentUser ? currentUser.name : ' '}}</p>
     </a>
+  </div>
+  <div class="dropdown" id="balance">
+    <button type="button" class="btn px-3 btn-default" id="dropdownBalance" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" *ngIf="currentUser">{{currentUser.balance | number:'1.2-2'}} UAH</button>
+    <div class="dropdown-menu mt-3" aria-labelledby="dropdownBalance">
+      <form class=" d-flex flex-column justify-content-center px-2">
+        <label for="balance" class="control-label">Введите сумму</label>
+        <input name="Login" type="number" class="form-control" id="balanceInput" placeholder="0.00" step="0.01" min="0" max="100000000" (input)="onValueInput($event.target.value)"/><br>
+        <button type="submit" class="btn btn-success align-self-end" (click)="onAddMoneyClick($event)" 
+        [disabled]="buttonIsDisabled">Add</button>
+      </form> 
+    </div>
   </div>
   <div>
     <button class="btn btn-default" type="button" (click)="logOut()">

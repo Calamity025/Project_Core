@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
-using AutoMapper;
 using BLL.Interfaces;
 using DAL.Interfaces;
 using Entities;
@@ -13,27 +11,20 @@ namespace BLL.Services
     public class TagManagementService : ITagManagementService
     {
         private readonly IDataUnitOfWork _db;
-        private readonly IMapper _mapper;
 
-        public TagManagementService(IDataUnitOfWork db, IMapper mapper)
-        {
+        public TagManagementService(IDataUnitOfWork db) =>
             _db = db;
-            _mapper = mapper;
-        }
 
-        public async Task<IEnumerable<Tag>> GetTagList()
-        {
-            return await _db.Tags.GetAll().ToListAsync();
-        }
+        public async Task<IEnumerable<Tag>> GetTagList() =>
+            await _db.Tags.GetAll().ToListAsync();
 
-        public async Task<Tag> CreateTag(Tag tag)
+        public async Task CreateTag(string tagName)
         {
+            var tag = new Tag(){Name = tagName};
             _db.Tags.Create(tag);
-
             try
             {
                 await _db.SaveChangesAsync();
-                return tag;
             }
             catch (Exception e)
             {
@@ -41,16 +32,14 @@ namespace BLL.Services
             }
         }
 
-        public async Task<Tag> UpdateTag(Tag newTag)
+        public async Task UpdateTag(int id, string newTagName)
         {
-            var tag = await _db.Tags.GetAsync(newTag.Id);
-            tag.Name = newTag.Name;
+            var tag = await _db.Tags.GetAsync(id);
+            tag.Name = newTagName;
             _db.Update(tag);
-
             try
             {
                 await _db.SaveChangesAsync();
-                return tag;
             }
             catch (Exception e)
             {
@@ -59,47 +48,18 @@ namespace BLL.Services
         }
 
 
-        public async Task<Tag> DeleteTag(int id)
+        public async Task DeleteTag(int id)
         {
             var tag = await _db.Tags.GetAsync(id);
             _db.Tags.Delete(tag);
-
             try
             {
                 await _db.SaveChangesAsync();
-                return tag;
             }
             catch (Exception e)
             {
                 throw new DatabaseException("Error when deleting a tag", e);
             }
-        }
-
-
-        bool disposed = false;
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposed)
-                return;
-
-            if (disposing)
-            {
-                _db.Dispose();
-            }
-
-            disposed = true;
-        }
-
-        ~TagManagementService()
-        {
-            Dispose(false);
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
 using DAL.Interfaces;
 using Entities;
-using Entities.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -19,9 +18,9 @@ namespace DAL
         public DbSet<Category> Categories { get; set; }
         public DbSet<BetHistory> BetHistories { get; set; }
 
-        public Task<int> SaveChangesAsync() => base.SaveChangesAsync();
+        public Task<int> SaveChangesAsync() => 
+            base.SaveChangesAsync();
 
-        
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -49,11 +48,6 @@ namespace DAL
                 .Property(p => p.Id)
                 .UseSqlServerIdentityColumn()
                 .Metadata.BeforeSaveBehavior = PropertySaveBehavior.Ignore;
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            base.OnConfiguring(optionsBuilder);
         }
     }
 }

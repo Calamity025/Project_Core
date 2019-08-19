@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Entities;
 
 namespace BLL.Interfaces
 {
-    public interface ICategoryManagementService : IDisposable
+    public interface ICategoryManagementService
     {
         Task<IEnumerable<Category>> GetCategoryList();
-        Task<Category> CreateCategory(Category category);
-        Task<Category> UpdateCategory(Category newCategory);
+        Task CreateCategory(string categoryName);
+        Task UpdateCategory(int id, string newCategoryName);
     }
 }

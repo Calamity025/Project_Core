@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿
 namespace BLL.DTO
 {
-    public class LoginInfo
+    public class LoginInfoDTO
     {
         public string Login { get; set; }
         public string  Password { get; set; }

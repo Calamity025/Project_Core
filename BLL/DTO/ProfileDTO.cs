@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Entities;
+﻿using System.Collections.Generic;
 
 namespace BLL.DTO
 {
@@ -9,11 +6,10 @@ namespace BLL.DTO
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public string DeliveryAddress { get; set; }
         public string ImageLink { get; set; }
-        public virtual ICollection<SlotMinimumDTO> FollowingSlots { get; set; }
-        public virtual ICollection<SlotMinimumDTO> BetSlots { get; set; }
-        public virtual ICollection<SlotMinimumDTO> PlacedSlots { get; set; }
-        public virtual ICollection<SlotMinimumDTO> WonSlots { get; set; }
+        public ICollection<SlotMinimumDTO> FollowingSlots { get; set; }
+        public ICollection<SlotMinimumDTO> BetSlots { get; set; }
+        public ICollection<SlotMinimumDTO> PlacedSlots { get; set; }
+        public ICollection<SlotMinimumDTO> WonSlots { get; set; }
     }
 }

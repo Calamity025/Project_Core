@@ -4,6 +4,7 @@ import { Tag } from 'src/app/models/tag';
 import { SearchService } from '../../../services/search.service';
 import { AuthService } from 'src/app/services';
 import { User } from 'src/app/models';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Component({
   selector: 'app-search-property',
@@ -19,9 +20,16 @@ export class SearchComponent implements OnInit {
   selectedTags? : Tag[] = [];
   isAuthorized? : boolean;
   currentUser? : User;
+  isEditCategoryOn? = false;
+  editNameCategory? : string;
+  editCategory? : Category;
+  editTag? : Tag;
+  editNameTag? : string;
+  isEditTagOn? = false;
 
   constructor(private searchService : SearchService,
-    private authService : AuthService) { }
+    private authService : AuthService,
+    private httpClient : HttpClient) { }
 
   ngOnInit() {
     this.authService.isAuthorized$.subscribe(val => this.isAuthorized = val);
@@ -46,12 +54,14 @@ export class SearchComponent implements OnInit {
 
   onTagAdd(){
     this.searchService.createTag(this.newTagName)
-      .subscribe(() => {this.searchService.refreshTags(); this.isFormActivated = false;});
+      .subscribe(() => {this.searchService.refreshTags(); this.isFormActivated = false;},
+      err => alert(err.error));
   }
 
   onCategoryAdd(){
     this.searchService.createCategory(this.newCategoryName)
-      .subscribe(() => {this.searchService.refreshCategories(); this.isFormActivated = false; });
+      .subscribe(() => {this.searchService.refreshCategories(); this.isFormActivated = false; },
+      err => alert(err.error));
   }
 
   onCategoryNameInput(value : string) {
@@ -94,5 +104,49 @@ export class SearchComponent implements OnInit {
       this.searchService.selectedTags.next(this.selectedTags);
       this.searchService.getSlotsByTags(this.selectedTags.map(x => x.id));
     }
+  }
+
+  onEditTagOn(tag : Tag){
+    this.isEditTagOn = true;
+    this.editTag = tag;
+  }
+
+  onTagEditNameInput(value : string){
+    this.editNameTag = value;
+  }
+
+  onTagEdit(){
+    this.httpClient.put<any>('https://localhost:44324/api/Tag/' + this.editTag.id, `"${this.editNameTag}"`, 
+    { headers: new HttpHeaders({'Content-Type': 'application/json'})})
+    .subscribe(() => {
+      this.searchService.refreshTags();
+      this.isEditTagOn = false;
+    },
+    err => alert(err.error)); 
+  }
+
+  onEditCategoryOn(category : Category){
+    this.isEditCategoryOn = true;
+    this.editCategory = category;
+  }
+
+  onCategoryEditNameInput(value : string){
+    this.editNameCategory = value;
+  }
+
+  onCategoryEdit(){
+    this.httpClient.put<any>('https://localhost:44324/api/Category/' + this.editCategory.id, `"${this.editNameCategory}"`, 
+    { headers: new HttpHeaders({'Content-Type': 'application/json'})})
+    .subscribe(() => {
+      this.searchService.refreshCategories();
+      this.isEditCategoryOn = false;
+    },
+    err => alert(err.error)); 
+  }
+
+  onDeleteTag(tag : Tag){
+    this.httpClient.delete<any>('https://localhost:44324/api/Tag/' + tag.id)
+    .subscribe(() => this.searchService.refreshTags(),
+    err => alert(err.error));
   }
 }

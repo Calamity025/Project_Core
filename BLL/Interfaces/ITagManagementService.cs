@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Entities;
 
 namespace BLL.Interfaces
 {
-    public interface ITagManagementService : IDisposable
+    public interface ITagManagementService
     {
         Task<IEnumerable<Tag>> GetTagList();
-        Task<Tag> CreateTag(Tag tag);
-        Task<Tag> UpdateTag(Tag newTag);
-        Task<Tag> DeleteTag(int id);
+        Task CreateTag(string tagName);
+        Task UpdateTag(int id, string newTagName);
+        Task DeleteTag(int id);
     }
 }

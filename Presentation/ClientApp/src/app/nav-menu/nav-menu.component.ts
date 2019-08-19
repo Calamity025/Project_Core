@@ -1,9 +1,4 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
-import { AuthService, ReqResService } from '../services';
-import { LoginModel, User } from '../models';
-import { map, tap, catchError } from 'rxjs/operators';
-import { Observable } from 'rxjs';
-import { Router } from '@angular/router';
+import { Component} from '@angular/core';
 
 @Component({
   selector: 'app-nav-menu',
@@ -13,13 +8,9 @@ import { Router } from '@angular/router';
 export class NavMenuComponent {
   isExpanded = false;
   
-  constructor() {
-      
-   }
+  constructor() {}
 
-  ngOnInit() {
-    
-  }
+  ngOnInit() {}
 
   collapse() {
     this.isExpanded = false;

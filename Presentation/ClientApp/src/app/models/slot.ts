@@ -5,6 +5,7 @@ import { UserSlot } from "./userSlot";
 
 export interface Slot {
     name : string;
+    starterPrice : number;
     price : number;
     step : number;
     endTime : string;

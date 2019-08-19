@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using BLL.Interfaces;
@@ -14,27 +12,20 @@ namespace BLL.Services
     public class CategoryManagementService : ICategoryManagementService
     {
         private readonly IDataUnitOfWork _db;
-        private readonly IMapper _mapper;
 
-        public CategoryManagementService(IDataUnitOfWork db, IMapper mapper)
-        {
+        public CategoryManagementService(IDataUnitOfWork db) =>
             _db = db;
-            _mapper = mapper;
-        }
 
-        public async Task<IEnumerable<Category>> GetCategoryList()
-        {
-            return await _db.Categories.GetAll().ToListAsync();
-        }
+        public async Task<IEnumerable<Category>> GetCategoryList() =>
+            await _db.Categories.GetAll().ToListAsync();
 
-        public async Task<Category> CreateCategory(Category category)
+        public async Task CreateCategory(string categoryName)
         {
+            var category = new Category() {Name = categoryName};
             _db.Categories.Create(category);
-
             try
             {
                 await _db.SaveChangesAsync();
-                return category;
             }
             catch (Exception e)
             {
@@ -42,47 +33,19 @@ namespace BLL.Services
             }
         }
 
-        public async Task<Category> UpdateCategory(Category newCategory)
+        public async Task UpdateCategory(int id, string newCategoryName)
         {
-            var category = await _db.Categories.GetAsync(newCategory.Id);
-            category.Name = newCategory.Name;
+            var category = await _db.Categories.GetAsync(id);
+            category.Name = newCategoryName;
             _db.Update(category);
-
             try
             {
                 await _db.SaveChangesAsync();
-                return category;
             }
             catch (Exception e)
             {
                 throw new DatabaseException("Error when updating a category", e);
             }
-        }
-
-        bool disposed = false;
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposed)
-                return;
-
-            if (disposing)
-            {
-                _db.Dispose();
-            }
-
-            disposed = true;
-        }
-
-        ~CategoryManagementService()
-        {
-            Dispose(false);
         }
     }
 }

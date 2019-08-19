@@ -2,7 +2,7 @@
 
 namespace Presentation.Models
 {
-    public class UserRegistrationModel
+    public class LoginInfoModel
     {
         [Required]
         [MaxLength(15)]
@@ -11,8 +11,5 @@ namespace Presentation.Models
         [MinLength(8)]
         [MaxLength(64)]
         public string Password { get; set; }
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; }
     }
 }

@@ -36,7 +36,8 @@ export class SearchService {
         .subscribe(val => {
           this.selectedSlots.next(val.slots);
           this.numberOfPages = parseInt(val.numberOfPages);
-        });
+        },
+        err => alert(err.error));
     }
 
     this.selectedCategory.subscribe(val => this.isCategory = !!val);
@@ -73,7 +74,8 @@ export class SearchService {
       .subscribe(val => {
         this.selectedSlots.next(val.slots);
         this.numberOfPages = parseInt(val.numberOfPages);
-      });
+      },
+      err => alert(err.error));
   }
 
   getSlotsByTags(tags : number[]){
@@ -88,7 +90,8 @@ export class SearchService {
       .subscribe(val => {
         this.selectedSlots.next(val.slots);
         this.numberOfPages = parseInt(val.numberOfPages);
-      });
+      },
+      err => alert(err.error));
   }
 
   getSlotsByName(name : string){
@@ -104,7 +107,8 @@ export class SearchService {
       .subscribe(val => {
         this.selectedSlots.next(val.slots);
         this.numberOfPages = parseInt(val.numberOfPages);
-      });
+      },
+      err => alert(err.error));
   }
 
   getSlots(){
@@ -112,7 +116,8 @@ export class SearchService {
         .subscribe(val => {
           this.selectedSlots.next(val.slots);
           this.numberOfPages = parseInt(val.numberOfPages);
-        });
+        },
+        err => alert(err.error));
   }
 
   getSlot(id : string) : Observable<Slot> {

@@ -6,7 +6,7 @@ import { SlotEditComponent } from './slot-edit/slot-edit.component';
 import { Routes, RouterModule } from '@angular/router';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { TokenInterceptor } from '../authorization/interceptor/token.interceptor';
+import { TokenInterceptor } from '../interceptor/token.interceptor';
 
 const routes : Routes = [
   {

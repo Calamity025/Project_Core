@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using BLL.DTO;
 using Entities;
 
 namespace BLL.Interfaces
 {
-    public interface ISlotRepresentationService : IDisposable
+    public interface ISlotRepresentationService
     {
         Task<Page> GetPage(int pageNumber, int slotsOnPage);
         Task<SlotFullDTO> GetSlot(int id);
@@ -20,9 +17,6 @@ namespace BLL.Interfaces
             int pageNumber, int slotsOnPage);
         Task<Page> GetByName(string query, int pageNumber, 
             int slotsOnPage);
-        Task<IEnumerable<SlotMinimumDTO>> GetUserFollowingSlots(int userId);
-        Task<IEnumerable<SlotMinimumDTO>> GetUserSlots(int userId);
-        Task<string> GetSlotImage(int slotId);
         Task<IEnumerable<Slot>> GetExpiredSlots();
 
     }

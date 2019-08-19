@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
@@ -35,19 +34,17 @@ namespace Presentation.Controllers
         [AllowAnonymous]
         public async Task Register([FromBody] UserRegistrationModel userInfo)
         {
-            if (!TryValidateModel(userInfo))
+            if (!ModelState.IsValid)
             {
                 Response.StatusCode = 400;
-                await Response.WriteAsync(ModelState.ToString());
+                await WriteErrors();
                 return;
             }
-
             try
             {
-                var user = await _identityService.Register(_mapper.Map<IdentityCreationDTO>(userInfo));
-                Response.StatusCode = 200;
-                await Response.WriteAsync(JsonConvert.SerializeObject(user,
-                    new JsonSerializerSettings { Formatting = Formatting.Indented }));
+                var info = _mapper.Map<IdentityCreationDTO>(userInfo);
+                await _identityService.Register(info);
+                Response.StatusCode = 201;
             }
             catch
             {
@@ -57,16 +54,22 @@ namespace Presentation.Controllers
 
         [AllowAnonymous]
         [HttpPost("/token")]
-        public async Task Token(LoginInfo info)
+        public async Task Token(LoginInfoModel infoModel)
         {
-            var identity = await _identityService.Login(info, "Token");
+            if (!ModelState.IsValid)
+            {
+                Response.StatusCode = 400;
+                await WriteErrors();
+                return;
+            }
+            var infoDTO = _mapper.Map<LoginInfoDTO>(infoModel);
+            var identity = await _identityService.Login(infoDTO, "Token");
             if (identity == null)
             {
                 Response.StatusCode = 400;
                 await Response.WriteAsync("Invalid username or password.");
                 return;
             }
-
             var now = DateTime.UtcNow;
             var jwt = new JwtSecurityToken(
                 issuer: AuthOptions.ISSUER,
@@ -76,11 +79,9 @@ namespace Presentation.Controllers
                 expires: now.Add(TimeSpan.FromMinutes(AuthOptions.LIFETIME)),
                 signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
             var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
-
             var response = new
             {
-                access_token = encodedJwt,
-                claims = identity.Claims.FirstOrDefault(x=> x.Type == "Id")?.Value
+                access_token = encodedJwt
             };
             await Response.WriteAsync(JsonConvert.SerializeObject(response,
                 new JsonSerializerSettings {Formatting = Formatting.Indented}));
@@ -88,19 +89,74 @@ namespace Presentation.Controllers
 
         [HttpGet]
         [Route("Current")]
-        public async Task GetCurrentUser()
+        public async Task<UserDTO> GetCurrentUser()
         {
-            UserDTO response = await _identityService.GetCurrentUser(User.Identity.Name);
-
-            await Response.WriteAsync(JsonConvert.SerializeObject(response,
-                new JsonSerializerSettings {Formatting = Formatting.Indented}));
+            var response = await _identityService.GetCurrentUser(User.Identity.Name);
+            Response.StatusCode = 200;
+            return response;
         }
 
         [Authorize]
         [HttpDelete]
-        public async Task Delete()
-        { 
+        public async Task Delete() => 
             await _identityService.DeleteIdentity(User.Identity.Name);
+
+        [Authorize(Roles = "admin")]
+        [HttpGet]
+        public async Task<IEnumerable<UserDTO>> GetUsers() =>
+            await _identityService.GetUsers();
+
+        [Authorize(Roles = "admin")]
+        [HttpPut]
+        public async Task AddToRoleAdmin([FromBody] string userName)
+        {
+            if (string.IsNullOrEmpty(userName) || userName.Length > 15)
+            {
+                Response.StatusCode = 400;
+                await WriteErrors();
+                return;
+            }
+            try
+            {
+                await _identityService.AddToRole(userName, "admin");
+                Response.StatusCode = 204;
+            }
+            catch
+            {
+                Response.StatusCode = 500;
+            }
+        }
+
+        [Authorize]
+        [HttpPut("addMoney")]
+        public async Task<decimal?> AddMoney([FromBody] decimal value)
+        {
+            if (value <= 0)
+            {
+                Response.StatusCode = 400;
+                return null;
+            }
+            var userId = Convert.ToInt32(User.Claims.First(x => x.Type == "Id").Value);
+            try
+            {
+                return await _identityService.AddMoney(userId, value);
+            }
+            catch
+            {
+                Response.StatusCode = 500;
+                return null;
+            }
+        }
+
+        private async Task WriteErrors()
+        {
+            foreach (var modelStateValue in ModelState.Values)
+            {
+                foreach (var error in modelStateValue.Errors)
+                {
+                    await Response.WriteAsync(error.ErrorMessage);
+                }
+            }
         }
     }
 }

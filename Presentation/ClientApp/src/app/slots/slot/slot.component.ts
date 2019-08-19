@@ -3,8 +3,8 @@ import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { SearchService } from 'src/app/services/search.service';
 import { Slot } from 'src/app/models/slot';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { BehaviorSubject } from 'rxjs';
 import { AuthService } from 'src/app/services';
+import { User } from 'src/app/models';
 
 @Component({
   selector: 'app-slot',
@@ -26,6 +26,7 @@ export class SlotComponent implements OnInit {
   isAuthorized? : boolean;
   isSeller? : boolean;
   isFollowing? = false;
+  currentUser? : User;
 
   constructor(private route: ActivatedRoute,
     private router : Router,
@@ -42,11 +43,14 @@ export class SlotComponent implements OnInit {
       let t = this.getRemainingTime();
       if(this.timeDifference <= 0){
         clearInterval(this.timeinterval);
+        this.searchService.getSlot(this.slotId).subscribe(val => {
+          this.slot = val;},
+          err => alert(err.error))
       }}, 1000);
       this.authService.currentUser$.subscribe(val => {
         if(val){
-          (val.Id == this.slot.user.id) ? this.isSeller = true : this.isSeller = false;
-          val.FollowingSlots.find(i => i == this.slotId) ? this.isFollowing = true : this.isFollowing = false;
+          (val.id == this.slot.user.id) ? this.isSeller = true : this.isSeller = false;
+          val.followingSlots.find(i => i == this.slotId) ? this.isFollowing = true : this.isFollowing = false;
         }
       });
     });
@@ -55,17 +59,20 @@ export class SlotComponent implements OnInit {
       val? this.updateUserBet() : this.userBet = null; 
       this.isAuthorized = val;
     });
+
+    this.authService.currentUser$.subscribe(val => this.currentUser = val);
   }
 
   updateUserBet(){
     this.searchService.getUserBet(this.slotId).subscribe(val => {
       if(val){
-        this.userBet = parseInt(val);
+        this.userBet = parseFloat(val);
       }
       else{
         this.userBet = null;
       }
-    });
+    },
+    err => alert(err.error));
   }
 
   onBackClick(){
@@ -98,11 +105,15 @@ export class SlotComponent implements OnInit {
       this.isMakeBetClicked = false;
       this.searchService.updatePrice(this.slotId).subscribe(val => this.slot.price = val);
       this.updateUserBet();
-    });
+    },
+    err => alert(err.error));
   }
 
   onBetInput(value : number){
-    if (value < this.slot.price + this.slot.step){
+    if (this.slot.price ? value < this.slot.price + this.slot.step : value < this.slot.starterPrice + this.slot.step){
+      this.isNotValid = true;
+    }
+    else if(value > this.currentUser.balance){
       this.isNotValid = true;
     }
     else{
@@ -112,22 +123,26 @@ export class SlotComponent implements OnInit {
   }
 
   onRefreshClick(){
-    this.searchService.updatePrice(this.slotId).subscribe(val => this.slot.price = val);
+    this.searchService.updatePrice(this.slotId).subscribe(val => this.slot.price = val,
+      err => alert(err.error));
   }
 
   onDeleteClick() {
     this.httpClient.delete<any>('https://localhost:44324/api/Slot/' + this.slotId)
-      .subscribe(() => this.router.navigate(['/']));
+      .subscribe(() => this.router.navigate(['/']),
+      err => alert(err.error));
   }
 
   onFollowClick(){
     if(this.isFollowing){
       this.httpClient.put<any>('https://localhost:44324/api/Profile/unfollow/' + this.slotId, null)
-        .subscribe(() => this.isFollowing = false);
+        .subscribe(() => this.isFollowing = false,
+        err => alert(err.error));
     }
     else{
       this.httpClient.put<any>('https://localhost:44324/api/Profile/follow/' + this.slotId, null)
-        .subscribe(() => this.isFollowing = true);
+        .subscribe(() => this.isFollowing = true,
+        err => alert(err.error));
     }
   }
 
@@ -140,6 +155,7 @@ export class SlotComponent implements OnInit {
       .subscribe(val =>{
         this.searchService.updatePrice(this.slotId).subscribe(val => this.slot.price = val);
         this.updateUserBet();
-      } )
+      },
+      err => alert(err.error))
   }
 }

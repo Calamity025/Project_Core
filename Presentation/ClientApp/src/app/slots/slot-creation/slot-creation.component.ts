@@ -77,13 +77,15 @@ export class SlotCreationComponent implements OnInit {
               this.router.navigate(['/']);
               this.searchService.getSlots();
               }
-            })
+            },
+            err => alert(err.error))
         }
         else if(val){
           this.router.navigate(['/']);
           this.searchService.getSlots();
         }
-    });
+    },
+    err => alert(err.error));
   }
 
   onTagInput(name : string){

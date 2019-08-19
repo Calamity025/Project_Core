@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using BLL.Interfaces;
@@ -13,23 +11,21 @@ namespace Presentation
     {
         private Timer _timer;
 
-        public SlotAutoclosingHostingService(IServiceProvider services)
-        {
+        public SlotAutoclosingHostingService(IServiceProvider services) =>
             Services = services;
-        }
 
         public IServiceProvider Services { get; }
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            _timer = new Timer(Routine, null, 0, 120000);
-
+            _timer = new Timer(Routine, null, 0, 60000);
             return Task.CompletedTask;
         }
 
         private void Routine(Object state)
         {
-            Routine();
+            var t = Routine();
+            t.Wait();
         }
 
         private async Task Routine()
@@ -39,17 +35,18 @@ namespace Presentation
                 var slotManagement = scope.ServiceProvider.GetService<ISlotManagementService>();
                 var slotRepresentation = scope.ServiceProvider.GetService<ISlotRepresentationService>();
                 var profileService = scope.ServiceProvider.GetService<IProfileManagementService>();
-
                 var expiredSlots = await slotRepresentation.GetExpiredSlots();
-                await slotManagement.CloseSlots(expiredSlots);
-                await profileService.AddToWonSlotsList(expiredSlots);
+                if (expiredSlots != null)
+                {
+                    await slotManagement.CloseSlots(expiredSlots);
+                    await profileService.AddToWonSlotsList(expiredSlots);
+                }
             }
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
             _timer?.Dispose();
-
             return Task.CompletedTask;
         }
     }

@@ -1,15 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using BLL;
 using BLL.DTO;
 using BLL.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
+using Presentation.Models;
 
 namespace Presentation.Controllers
 {
@@ -19,10 +19,12 @@ namespace Presentation.Controllers
     public class ProfileController : ControllerBase
     {
         private readonly IProfileManagementService _profileManagementService;
+        private readonly IMapper _mapper;
 
-        public ProfileController(IProfileManagementService profileManagementService)
+        public ProfileController(IProfileManagementService profileManagementService, IMapper mapper)
         {
             _profileManagementService = profileManagementService;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -49,8 +51,14 @@ namespace Presentation.Controllers
             try
             {
                 var slots = await _profileManagementService.GetFollowingSlots(id);
+                var ids = slots.Select(x => x.Id).ToArray();
+                if (ids.Any(x => x <= 0))
+                {
+                    Response.StatusCode = 400;
+                    return null;
+                }
                 Response.StatusCode = 200;
-                return slots.Select(x => x.Id).ToArray();
+                return ids;
             }
             catch (NotFoundException)
             {
@@ -62,16 +70,22 @@ namespace Presentation.Controllers
                 Response.StatusCode = 500;
                 return null;
             }
-
         }
 
         [HttpPost]
-        public async Task Post([FromBody] ProfileCreationDTO profile)
+        public async Task Post([FromBody] ProfileCreationModel profile)
         {
+            if (!ModelState.IsValid)
+            {
+                Response.StatusCode = 400;
+                await WriteErrors();
+                return;
+            }
             var id = Convert.ToInt32(User.Claims.First(x => x.Type == "Id").Value);
             try
             {
-                await _profileManagementService.CreateProfile(id, profile);
+                await _profileManagementService.CreateProfile(id, 
+                    _mapper.Map<ProfileCreationDTO>(profile));
                 Response.StatusCode = 200;
             }
             catch (Exception)
@@ -84,6 +98,12 @@ namespace Presentation.Controllers
         [Route("image")]
         public async Task Post(IFormFile file)
         {
+            if (file == null)
+            {
+                Response.StatusCode = 400;
+                await Response.WriteAsync("File is null");
+                return;
+            }
             var id = Convert.ToInt32(User.Claims.First(x => x.Type == "Id").Value);
             try
             {
@@ -91,19 +111,15 @@ namespace Presentation.Controllers
                 {
                     Directory.CreateDirectory(Directory.GetCurrentDirectory() + "\\wwwroot\\UserAvatars\\");
                 }
-
                 using (FileStream filestream = System.IO.File.Create(
-                    Directory.GetCurrentDirectory() + "\\wwwroot\\UserAvatars\\" +
-                    $"{Path.GetFileNameWithoutExtension(file.FileName)}_{id}{Path.GetExtension(file.FileName)}"))
+                    Directory.GetCurrentDirectory() + "\\wwwroot\\UserAvatars\\" + $"_{id}{Path.GetExtension(file.FileName)}"))
                 {
                     file.CopyTo(filestream);
                     filestream.Flush();
                     await _profileManagementService.AddAvatarLink(id,
-                        $"/UserAvatars/{Path.GetFileNameWithoutExtension(file.FileName)}_{id}{Path.GetExtension(file.FileName)}");
+                        $"/UserAvatars/_{id}{Path.GetExtension(file.FileName)}");
                 }
-
-                Response.StatusCode = 200;
-                await Response.WriteAsync(id.ToString());
+                Response.StatusCode = 201;
             }
             catch (NotFoundException)
             {
@@ -119,6 +135,12 @@ namespace Presentation.Controllers
         [HttpPut("follow/{id}")]
         public async Task AddToFollowingList(int id)
         {
+            if (id <= 0)
+            {
+                Response.StatusCode = 400;
+                await Response.WriteAsync("Slot id cannot be null");
+                return;
+            }
             var userId = Convert.ToInt32(User.Claims.First(x => x.Type == "Id").Value);
             try
             {
@@ -134,6 +156,12 @@ namespace Presentation.Controllers
         [HttpPut("unfollow/{id}")]
         public async Task RemoveFromFollowingList(int id)
         {
+            if (id <= 0)
+            {
+                Response.StatusCode = 400;
+                await Response.WriteAsync("Slot id cannot be null");
+                return;
+            }
             var userId = Convert.ToInt32(User.Claims.First(x => x.Type == "Id").Value);
             try
             {
@@ -143,6 +171,17 @@ namespace Presentation.Controllers
             catch
             {
                 Response.StatusCode = 500;
+            }
+        }
+
+        private async Task WriteErrors()
+        {
+            foreach (var modelStateValue in ModelState.Values)
+            {
+                foreach (var error in modelStateValue.Errors)
+                {
+                    await Response.WriteAsync(error.ErrorMessage);
+                }
             }
         }
     }

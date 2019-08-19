@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Entities;
-using Entities.Identity;
 using Microsoft.AspNetCore.Identity;
 
 namespace DAL.Interfaces

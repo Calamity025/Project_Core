@@ -2,14 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using BLL.DTO;
 using BLL.Interfaces;
 using DAL.Interfaces;
 using Entities;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace BLL.Services
@@ -35,7 +33,6 @@ namespace BLL.Services
             {
                 throw new DatabaseException();
             }
-
             User user = _mapper.Map<User>(identityCreation);
             UserInfo info = new UserInfo(){User = user, Id = user.Id};
             _db.UserInfos.Create(info);
@@ -56,10 +53,10 @@ namespace BLL.Services
             }
         }
 
-        public async Task<ClaimsIdentity> Login(LoginInfo loginInfo, string authType)
+        public async Task<ClaimsIdentity> Login(LoginInfoDTO loginInfoDto, string authType)
         {
-            User user = await _identity.UserManager.FindByNameAsync(loginInfo.Login);
-            if (user != null && await _identity.UserManager.CheckPasswordAsync(user, loginInfo.Password))
+            User user = await _identity.UserManager.FindByNameAsync(loginInfoDto.Login);
+            if (user != null && await _identity.UserManager.CheckPasswordAsync(user, loginInfoDto.Password))
             {
                 var claims = await _identity.UserManager.GetClaimsAsync(user);
                 foreach (var role in await _identity.UserManager.GetRolesAsync(user))
@@ -67,7 +64,6 @@ namespace BLL.Services
                     var roleClaim = new Claim(ClaimTypes.Role, role);
                     claims.Add(roleClaim);
                 }
-
                 return new ClaimsIdentity(claims, authType);
             }
             return null;
@@ -78,7 +74,9 @@ namespace BLL.Services
             User user = await _identity.UserManager.FindByNameAsync(name);
             UserDTO res = _mapper.Map<UserDTO>(user);
             UserInfo info = await _db.UserInfos.GetAll()
-                .Where(x => x.Id == user.Id).Include(x => x.FollowingSlots).FirstAsync();
+                .Where(x => x.Id == user.Id)
+                .Include(x => x.FollowingSlots)
+                .FirstOrDefaultAsync();
             res.AvatarLink = info.ImageLink;
             res.FollowingSlots = info.FollowingSlots.Select(x => x.Id);
             res.Roles = await _identity.UserManager.GetRolesAsync(user);
@@ -86,21 +84,14 @@ namespace BLL.Services
             return res;
         }
 
-        public async Task AddToRole(string name, string roleName)
-        {
-
-        }
-
         public async Task DeleteIdentity(string name)
         {
             User user = await _identity.UserManager.FindByNameAsync(name);
-
             var slots = await _db.Slots.GetAll().Where(x => x.UserId == user.Id).ToListAsync();
             foreach (var slot in slots)
             {
                 await _slotManagementService.DeleteSlot(slot.Id, user.Id);
             }
-
             var info = await _db.UserInfos.GetAll().Where(x => x.Id == user.Id)
                 .Include(x => x.FollowingSlots)
                 .Include(x => x.BetSlots)
@@ -113,43 +104,43 @@ namespace BLL.Services
             info.WonSlots = null;
             _db.UserInfos.Delete(info);
             await _db.SaveChangesAsync();
-
             await _identity.UserManager.DeleteAsync(user);
         }
 
-        public async Task AddToRoleAsync(string userName, string role)
+        public async Task AddToRole(string userName, string role)
         {
             var user = await _identity.UserManager.FindByNameAsync(userName);
             if (user != null)
-            {
                 await _identity.UserManager.AddToRoleAsync(user, role);
-            }
         }
 
-        bool disposed = false;
-
-        public void Dispose()
+        public async Task<IEnumerable<UserDTO>> GetUsers()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposed)
-                return;
-
-            if (disposing)
+            var users = await _identity.UserManager.Users.ToListAsync();
+            List<UserDTO> userDTOs = new List<UserDTO>();
+            foreach (var user in users)
             {
-                _identity.Dispose();
+                var userDTO = _mapper.Map<UserDTO>(user);
+                userDTO.Roles = await _identity.UserManager.GetRolesAsync(user);
+                userDTOs.Add(userDTO);
             }
-
-            disposed = true;
+            return userDTOs;
         }
 
-        ~IdentityService()
+        public async Task<decimal> AddMoney(int userId, decimal value)
         {
-            Dispose(false);
+            var user = await _db.UserInfos.GetAsync(userId);
+            user.Balance += value;
+            _db.Update(user);
+            try
+            {
+                await _db.SaveChangesAsync();
+                return user.Balance;
+            }
+            catch (Exception e)
+            {
+                throw new DatabaseException("Error when adding money to balance", e);
+            }
         }
     }
 }

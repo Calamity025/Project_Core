@@ -67,22 +67,33 @@
         </div>
         <div class="p-2 d-flex flex-column justify-content-center align-items-center" style="height: 100%">
           <div style="text-align: center" class="mb-2" >
-            <span class="lead">Оставшееся время: {{days}} дней : {{hours}} часов : {{minutes}} минут</span>
+            <span class="lead">Оставшееся время: {{days >= 0 ? days : 0}} дней : {{hours >= 0 ? hours : 0}} часов : {{minutes  >= 0 ? minutes : 0}} минут</span>
           </div>
-          <div class="d-flex flex-wrap align-items-end justify-content-center p-2">
-            <span class="lead pr-4">Текущая цена: </span>
-            <div class="pr-3">
-              <span class="h2">{{slot.price | number:'1.2-2'}} UAH</span>
+          <div class="p-2">
+            <div class="d-flex flex-wrap align-items-end justify-content-center mt-2">
+              <span class="lead pr-4">Стартовая цена: </span>
+              <div class="pr-3">
+                <span class="h2">{{slot.starterPrice | number:'1.2-2'}} UAH</span>
+              </div>
             </div>
-            <div class="button rounded p-2" (click)="onRefreshClick()">
-              <small style="user-select: none;">
-                Обновить цену
-              </small>
+            <div *ngIf="slot.price" class="d-flex flex-wrap align-items-end justify-content-center mt-2">
+              <span class="lead pr-4">Текущая цена: </span>
+              <div class="pr-3">
+                <span class="h2">{{slot.price | number:'1.2-2'}} UAH</span>
+              </div>
+              <div class="button rounded p-2" (click)="onRefreshClick()">
+                <small style="user-select: none;">
+                  Обновить цену
+                </small>
+              </div>
+              <div *ngIf="!slot.price">
+                <span class="lead pr-4">Ставок пока нет</span>
+              </div>
             </div>
           </div>
           <div class="my-2" *ngIf="userBet && !isSeller" style="text-align: center">
               <span class="lead">Ваша ставка: {{userBet | number:'1.2-2'}} UAH</span>
-              <button type="button" class="btn btn-danger btn-sm ml-2" (click)="onUndoBet()">Отменить ставку</button>
+              <button type="button" class="btn btn-danger btn-sm ml-2" (click)="onUndoBet()" [disabled]="slot.status != 'Started'">Отменить ставку</button>
           </div>
           <div class="my-2" style="text-align: center">
               <span class="lead">Шаг ставки: {{slot.step | number:'1.2-2'}} UAH</span>
@@ -90,13 +101,13 @@
           <div class="mx-auto my-2 p-2 d-flex flex-wrap flex-column align-items-center">
             <form *ngIf="isMakeBetClicked">
               <div class="input-group">
-                <input name="bet" type="number" class="form-control" id="bet" [class.is-invalid]="isNotValid" [step]="slot.step" [min]="slot.price + slot.step" (input)="onBetInput($event.target.value)"/><br>
+                <input name="bet" type="number" class="form-control" id="bet" [class.is-invalid]="isNotValid" [step]="slot.step" [min]="slot.price ? slot.price + slot.step : slot.starterPrice + slot.step" (input)="onBetInput($event.target.value)"/><br>
                 <div class="input-group-append">
                     <button class="btn btn-success" type="button" (click)="onMakeBetClick()">Поставить</button>
                 </div>
             </div>
             </form>
-            <button type="button" class="btn btn-lg btn-success" *ngIf="!isMakeBetClicked" [disabled]="!isAuthorized"  (click)="onBetClick()">Сделать ставку</button>
+            <button type="button" class="btn btn-lg btn-success" *ngIf="!isMakeBetClicked" [disabled]="!isAuthorized || isSeller || slot.status != 'Started'"  (click)="onBetClick()">Сделать ставку</button>
           </div>
         </div>
       </div>

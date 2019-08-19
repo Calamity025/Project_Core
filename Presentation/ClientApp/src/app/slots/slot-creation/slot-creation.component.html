@@ -51,7 +51,7 @@
           <div class="col-6 pl-0">
             <label for="inputPrice3" class="control-label">Начальная цена</label>
             <div class="input-group">
-              <input name="Price" type="number" class="form-control" id="Price" placeholder="0.00" step="0.01" min="0" max="100000000" (input)="onPriceInput($event.target.value)"/><br>
+              <input name="Price" type="number" class="form-control" id="Price" placeholder="0.00" step="0.01" min="1" max="100000000" (input)="onPriceInput($event.target.value)"/><br>
               <div class="input-group-append">
                   <span class="input-group-text" id="basic-addon1" style="user-select: none;">UAH</span>
               </div>
@@ -60,7 +60,7 @@
           <div class="col-6 pr-0 align-self-end">
             <label for="inputPrice3" class="control-label">Шаг</label>
             <div class="input-group">
-              <input name="Price" type="number" class="form-control" id="Step" placeholder="0" step="1" min="0" max="100000000" (input)="onStepInput($event.target.value)"/><br>  
+              <input name="Price" type="number" class="form-control" id="Step" placeholder="0" step="1" min="1" max="100000000" (input)="onStepInput($event.target.value)"/><br>  
               <div class="input-group-append">
                   <span class="input-group-text" id="basic-addon1" style="user-select: none;">UAH</span>
               </div>
