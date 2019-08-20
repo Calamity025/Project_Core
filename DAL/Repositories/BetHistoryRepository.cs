@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DAL.Interfaces;
 using Entities;
@@ -26,5 +27,8 @@ namespace DAL.Repositories
 
         public void Delete(BetHistory category) =>
             _context.BetHistories.Remove(category);
+
+        public void DeleteRange(IEnumerable<BetHistory> categories) =>
+            _context.BetHistories.RemoveRange(categories);
     }
 }

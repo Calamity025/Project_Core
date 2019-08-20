@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using BLL.Interfaces;
@@ -37,9 +38,10 @@ namespace Presentation.Controllers
                 await _tagManagementService.CreateTag(tagName);
                 Response.StatusCode = 201;
             }
-            catch
+            catch (Exception e)
             {
                 Response.StatusCode = 500;
+                await Response.WriteAsync(e.ToString());
             }
         }
 
@@ -58,9 +60,10 @@ namespace Presentation.Controllers
                 await _tagManagementService.UpdateTag(id, tagName);
                 Response.StatusCode = 204;
             }
-            catch
+            catch (Exception e)
             {
                 Response.StatusCode = 500;
+                await Response.WriteAsync(e.ToString());
             }
         }
 
@@ -79,9 +82,10 @@ namespace Presentation.Controllers
                 await _tagManagementService.DeleteTag(id);
                 Response.StatusCode = 204;
             }
-            catch
+            catch (Exception e)
             {
                 Response.StatusCode = 500;
+                await Response.WriteAsync(e.ToString());
             }
         }
     }

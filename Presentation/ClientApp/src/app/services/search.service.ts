@@ -19,7 +19,7 @@ export class SearchService {
   selectedCategory = new BehaviorSubject<Category>(null);
   selectedTags = new BehaviorSubject<Tag[]>([]);
   page : number = 1;
-  itemsOnPage : number = 1;
+  itemsOnPage : number = 10;
   numberOfPages? : number;
   isTags = false;
   isCategory = false;
@@ -74,7 +74,8 @@ export class SearchService {
       .subscribe(val => {
         this.selectedSlots.next(val.slots);
         this.numberOfPages = parseInt(val.numberOfPages);
-      });
+      },
+      err => console.log(err.error));
   }
 
   getSlotsByTags(tags : number[]){
@@ -89,7 +90,8 @@ export class SearchService {
       .subscribe(val => {
         this.selectedSlots.next(val.slots);
         this.numberOfPages = parseInt(val.numberOfPages);
-      });
+      },
+      err => console.log(err.error));
   }
 
   getSlotsByName(name : string){
@@ -105,7 +107,8 @@ export class SearchService {
       .subscribe(val => {
         this.selectedSlots.next(val.slots);
         this.numberOfPages = parseInt(val.numberOfPages);
-      });
+      },
+      err => console.log(err.error));
   }
 
   getSlots(){
@@ -113,7 +116,8 @@ export class SearchService {
         .subscribe(val => {
           this.selectedSlots.next(val.slots);
           this.numberOfPages = parseInt(val.numberOfPages);
-        });
+        }, 
+        err => console.log(err.error));
   }
 
   getSlot(id : string) : Observable<Slot> {

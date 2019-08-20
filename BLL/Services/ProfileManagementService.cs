@@ -72,7 +72,7 @@ namespace BLL.Services
                 {
                     throw new NotFoundException();
                 }
-                var user = await _db.UserInfos.GetAsync(history.UserId);
+                var user = await _db.UserInfos.GetAsync(history.BetUserInfoId);
                 if (user == null)
                 {
                     throw new NotFoundException();
@@ -84,7 +84,6 @@ namespace BLL.Services
             await _db.SaveChangesAsync();
         }
 
-
         public async Task AddToUserFollowingList(int userId, int slotId)
         {
             var userTask = _db.UserInfos.GetAsync(userId);
@@ -95,11 +94,11 @@ namespace BLL.Services
             {
                 throw new NotFoundException();
             }
-            if (user.FollowingSlots.Contains(slot))
+            if (user.FollowingSlots.Any(x => x.Slot == slot))
             {
                 throw new DatabaseException("This user already follows this slot");
             }
-            user.FollowingSlots.Add(slot);
+            _db.UserInfos.Follow(new FollowingSlots(){Slot = slot, FollowingUserInfo = user});
             _db.Update(user);
             try
             {
@@ -121,7 +120,8 @@ namespace BLL.Services
             {
                 throw new NotFoundException();
             }
-            user.FollowingSlots.Remove(slot);
+            _db.UserInfos
+                .Unfollow(user.FollowingSlots.FirstOrDefault(x => x.Slot == slot));
             _db.Update(user);
             try
             {
@@ -152,7 +152,9 @@ namespace BLL.Services
         {
             var profile = await _db.UserInfos.GetAll().Where(x => x.Id == id)
                 .Include(x => x.FollowingSlots)
+                .ThenInclude(x => x.Slot)
                 .Include(x => x.BetSlots)
+                .ThenInclude(x => x.Slot)
                 .Include(x => x.PlacedSlots)
                 .Include(x => x.WonSlots)
                 .FirstOrDefaultAsync();
@@ -161,8 +163,8 @@ namespace BLL.Services
                 throw new NotFoundException();
             }
             ProfileDTO profileDto = _mapper.Map<ProfileDTO>(profile);
-            profileDto.FollowingSlots = Map(profile.FollowingSlots);
-            profileDto.BetSlots = Map(profile.BetSlots);
+            profileDto.FollowingSlots = Map(profile.FollowingSlots.Select(x => x.Slot));
+            profileDto.BetSlots = Map(profile.BetSlots.Select(x => x.Slot));
             profileDto.WonSlots = Map(profile.WonSlots);
             profileDto.PlacedSlots = Map(profile.PlacedSlots);
             return profileDto;

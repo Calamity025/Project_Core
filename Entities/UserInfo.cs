@@ -16,16 +16,16 @@ namespace Entities
         [DefaultValue(0)]
         public decimal Balance { get; set; }
         public string ImageLink { get; set; }
-        public virtual ICollection<Slot> FollowingSlots { get; set; }
-        public virtual ICollection<Slot> BetSlots { get; set; }
+        public virtual ICollection<FollowingSlots> FollowingSlots { get; }
+        public virtual ICollection<BetHistory> BetSlots { get; }
         public virtual ICollection<Slot> PlacedSlots { get; set; }
         public virtual ICollection<Slot> WonSlots { get; set; }
 
         public UserInfo()
         {
-            FollowingSlots = new List<Slot>();
+            FollowingSlots = new List<FollowingSlots>();
+            BetSlots = new List<BetHistory>();
             PlacedSlots = new List<Slot>();
-            BetSlots = new List<Slot>();
             WonSlots = new List<Slot>();
         }
     }

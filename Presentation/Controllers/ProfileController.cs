@@ -65,9 +65,10 @@ namespace Presentation.Controllers
                 Response.StatusCode = 404;
                 return null;
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 Response.StatusCode = 500;
+                await Response.WriteAsync(e.ToString());
                 return null;
             }
         }
@@ -88,9 +89,10 @@ namespace Presentation.Controllers
                     _mapper.Map<ProfileCreationDTO>(profile));
                 Response.StatusCode = 200;
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 Response.StatusCode = 500;
+                await Response.WriteAsync(e.ToString());
             }
         }
 
@@ -125,9 +127,10 @@ namespace Presentation.Controllers
             {
                 Response.StatusCode = 404;
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 Response.StatusCode = 500;
+                await Response.WriteAsync(e.ToString());
             }
 
         }
@@ -147,9 +150,10 @@ namespace Presentation.Controllers
                 await _profileManagementService.AddToUserFollowingList(userId, id);
                 Response.StatusCode = 200;
             }
-            catch
+            catch (Exception e)
             {
                 Response.StatusCode = 500;
+                await Response.WriteAsync(e.ToString());
             }
         }
 
@@ -168,9 +172,10 @@ namespace Presentation.Controllers
                 await _profileManagementService.RemoveFromUserFollowingList(userId, id);
                 Response.StatusCode = 200;
             }
-            catch
+            catch (Exception e)
             {
                 Response.StatusCode = 500;
+                await Response.WriteAsync(e.ToString());
             }
         }
 

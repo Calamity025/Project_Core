@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using BLL.Interfaces;
 using DAL.Interfaces;
@@ -16,7 +17,7 @@ namespace BLL.Services
             _db = db;
 
         public async Task<IEnumerable<Tag>> GetTagList() =>
-            await _db.Tags.GetAll().ToListAsync();
+            await _db.Tags.GetAll().OrderBy(x => x.Name).ToListAsync();
 
         public async Task CreateTag(string tagName)
         {

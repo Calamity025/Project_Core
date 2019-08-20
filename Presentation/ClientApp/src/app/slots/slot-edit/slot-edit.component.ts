@@ -127,12 +127,14 @@ export class SlotEditComponent implements OnInit {
           this.httpClient.put<any>('https://localhost:44324/api/Slot/image/' + this.slotId, formData)
           .subscribe(val => {
               this.router.navigate(['/slot/'+this.slotId]);
-            })
+            },
+            err => err.status == 400 ? alert(err.error) : console.log(err.error))
         }
         else{
           this.router.navigate(['/slot/' + this.slotId]);
         }
-    });
+    },
+    err => err.status == 400 ? alert(err.error) : console.log(err.error));
   }
 
   onDescriptionInput(value : string){
@@ -145,7 +147,10 @@ export class SlotEditComponent implements OnInit {
 
   onChangeStatusClick(){
     this.httpClient.put<any>('https://localhost:44324/api/Slot/' + this.slotId + '/status', `"${this.selectedStatus}"`, 
-    { headers: new HttpHeaders({'Content-Type': 'application/json'})}).subscribe(() => this.searchService.getSlot(this.slotId).subscribe(val => {
-      this.slot = val;}));
+    { headers: new HttpHeaders({'Content-Type': 'application/json'})})
+    .subscribe(() => this.searchService.getSlot(this.slotId).subscribe(val => {
+      this.slot = val;},
+      err => err.status == 400 ? alert(err.error) : console.log(err.error)),
+      err => err.status == 400 ? alert(err.error) : console.log(err.error));
   }
 }

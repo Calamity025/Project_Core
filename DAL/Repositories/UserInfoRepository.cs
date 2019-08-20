@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DAL.Interfaces;
 using Entities;
@@ -26,5 +27,14 @@ namespace DAL.Repositories
 
         public void Delete(UserInfo info) =>
            _context.UserInfos.Remove(info);
+
+        public void Follow(FollowingSlots item) =>
+            _context.FollowingSlots.Add(item);
+
+        public void Unfollow(FollowingSlots item) =>
+            _context.FollowingSlots.Remove(item);
+
+        public void UnfollowRange(IEnumerable<FollowingSlots> items) =>
+            _context.FollowingSlots.RemoveRange(items);
     }
 }

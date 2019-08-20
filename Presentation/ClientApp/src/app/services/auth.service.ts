@@ -26,7 +26,7 @@ export class AuthService {
           this.jwtService.persistToken(val.access_token);
           this.getCurrentUser();
         },
-        err => alert(err.error)
+        err => err.status == 400 ? alert(err.error) : console.log(err.error)
     );
     }
   
@@ -38,22 +38,17 @@ export class AuthService {
 
     public signUp(userRegistration : UserRegistrationModel) : Observable<User>{
       const PATH = 'https://localhost:44324/Register';
-      return this.httpClient.post<User>(PATH, userRegistration, {observe : 'response'})
-      .pipe(catchError(error => {
-        alert(error);
-        return of(null);
-      }))
+      return this.httpClient.post<User>(PATH, userRegistration);
     }
   
     public getCurrentUser() {    
       if(!this.jwtService.isExpired()){
         this.httpClient.get<User>('https://localhost:44324/Account/Current')
         .subscribe(x => {
-          
-        console.log(x);
           this.currentUser$.next(x);
           this.isAuthorized$.next(true);
-        });
+        },
+        err => err.status == 400 ? alert(err.error) : console.log(err.error));
       }
     }
 
@@ -63,6 +58,7 @@ export class AuthService {
       .subscribe(val => {
         this.currentUser.balance = parseFloat(val);
         this.currentUser$.next(this.currentUser);
-      })
+      },
+      err => err.status == 400 ? alert(err.error) : console.log(err.error))
     }
 }

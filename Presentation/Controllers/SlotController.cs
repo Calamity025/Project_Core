@@ -58,9 +58,10 @@ namespace Presentation.Controllers
             {
                 Response.StatusCode = 404;
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 Response.StatusCode = 500;
+                await Response.WriteAsync(e.ToString());
             }
 
             return null;
@@ -132,7 +133,7 @@ namespace Presentation.Controllers
             catch (Exception e)
             {
                 Response.StatusCode = 500;
-                await Response.WriteAsync(e.Message);
+                await Response.WriteAsync(e.ToString());
             }
         }
 
@@ -167,9 +168,10 @@ namespace Presentation.Controllers
             {
                 Response.StatusCode = 404;
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 Response.StatusCode = 500;
+                await Response.WriteAsync(e.ToString());
             }
 
         }
@@ -232,9 +234,10 @@ namespace Presentation.Controllers
                 await _slotManagementService.MakeBet(id, userId, bet);
                 Response.StatusCode = 204;
             }
-            catch
+            catch (Exception e)
             {
                 Response.StatusCode = 500;
+                await Response.WriteAsync(e.ToString());
             }
         }
 
@@ -254,9 +257,10 @@ namespace Presentation.Controllers
                 await _slotManagementService.UndoBet(id, userId);
                 Response.StatusCode = 204;
             }
-            catch
+            catch (Exception e)
             {
                 Response.StatusCode = 500;
+                await Response.WriteAsync(e.ToString());
             }
         }
 
@@ -277,9 +281,10 @@ namespace Presentation.Controllers
                 await _slotManagementService.UpdateGeneralInfo(id, info);
                 Response.StatusCode = 204;
             }
-            catch
+            catch (Exception e)
             {
                 Response.StatusCode = 500;
+                await Response.WriteAsync(e.ToString());
             }
         }
 
@@ -306,9 +311,10 @@ namespace Presentation.Controllers
             {
                 Response.StatusCode = 404;
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 Response.StatusCode = 500;
+                await Response.WriteAsync(e.ToString());
             }
         }
 
@@ -323,9 +329,10 @@ namespace Presentation.Controllers
                     await _slotManagementService.UpdateStatus(id, slotStatus);
                     Response.StatusCode = 204;
                 }
-                catch
+                catch (Exception e)
                 {
                     Response.StatusCode = 500;
+                    await Response.WriteAsync(e.ToString());
                 }
             }
             else
@@ -356,9 +363,10 @@ namespace Presentation.Controllers
                     System.IO.File.Delete(imageLink);
                 }
             }
-            catch
+            catch (Exception e)
             {
                 Response.StatusCode = 500;
+                await Response.WriteAsync(e.ToString());
             }
         }
 

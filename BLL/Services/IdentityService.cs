@@ -79,7 +79,7 @@ namespace BLL.Services
                 .Include(x => x.FollowingSlots)
                 .FirstOrDefaultAsync();
             res.AvatarLink = info.ImageLink;
-            res.FollowingSlots = info.FollowingSlots.Select(x => x.Id);
+            res.FollowingSlots = info.FollowingSlots.Select(x => x.SlotId);
             res.Roles = await _identity.UserManager.GetRolesAsync(user);
             res.Balance = info.Balance;
             return res;
@@ -92,7 +92,7 @@ namespace BLL.Services
             {
                 throw new NotFoundException();
             }
-            var slots = await _db.Slots.GetAll().Where(x => x.UserId == user.Id).ToListAsync();
+            var slots = await _db.Slots.GetAll().Where(x => x.UserInfoId == user.Id).ToListAsync();
             foreach (var slot in slots)
             {
                 await _slotManagementService.DeleteSlot(slot.Id, user.Id);
@@ -103,8 +103,8 @@ namespace BLL.Services
                 .Include(x => x.PlacedSlots)
                 .Include(x => x.WonSlots)
                 .FirstOrDefaultAsync();
-            info.BetSlots = null;
-            info.FollowingSlots = null;
+            _db.UserInfos.UnfollowRange(info.FollowingSlots);
+            _db.BetHistories.DeleteRange(info.BetSlots);
             info.PlacedSlots = null;
             info.WonSlots = null;
             _db.UserInfos.Delete(info);

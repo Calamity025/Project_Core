@@ -69,18 +69,15 @@ export class AuthorizationComponent implements OnInit {
       Email: this.email
     };
 
-    this.authService.signUp(user).subscribe(response => {
-      if(!!response){
+    this.authService.signUp(user).subscribe(() => {
       const loginInfo : LoginModel = {
         login: this.login,
         password: this.password
       };
       this.authService.signIn(loginInfo);
-      this.router.navigate(["/register/profile"]); 
-      this.authService.isAuthorized$.next(true);
-      }
+      this.router.navigate(["/register/profile"]);
     },
-    err => alert(err.error))
+    err => err.status == 400 ? alert(err.error) : console.log(err.error))
   }
 
   onAddMoneyClick(){

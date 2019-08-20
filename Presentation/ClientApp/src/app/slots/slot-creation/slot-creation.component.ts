@@ -6,7 +6,6 @@ import { SlotCreationModel } from 'src/app/models/SlotCreationModel';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/services';
-import { Category } from 'src/app/models/category';
 
 @Component({
   selector: 'app-slot-creation',
@@ -75,13 +74,15 @@ export class SlotCreationComponent implements OnInit {
           .subscribe(val => {
               this.router.navigate(['/']);
               this.searchService.getSlots();
-            })
+            },
+            err => err.status == 400 ? alert(err.error) : console.log(err.error))
         }
         else if(val){
           this.router.navigate(['/']);
           this.searchService.getSlots();
         }
-    });
+    }, 
+    err => err.status == 400 ? alert(err.error) : console.log(err.error));
   }
 
   onTagInput(name : string){

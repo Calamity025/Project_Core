@@ -30,9 +30,6 @@ export class ProfileCreationComponent implements OnInit {
     });
     this.authService.isAuthorized$.subscribe(val => {
       this.isAuthorized = val;
-      if(!this.isAuthorized){
-        this.router.navigate(['/']);
-      }
     });
   }
 
@@ -55,13 +52,15 @@ export class ProfileCreationComponent implements OnInit {
     this.httpClient.post<any>('https://localhost:44324/api/Profile/', user)
       .subscribe(() =>{
           this.router.navigate(["/"]);
-        });
+        },
+        err => err.status == 400 ? alert(err.error) : console.log(err.error));
 
     if(this.uploadForm.get('profile').value){
       const formData = new FormData();
       formData.append('file', this.uploadForm.get('profile').value);
       this.httpClient.post<any>('https://localhost:44324/api/Profile/image', formData).subscribe(
-        val => this.authService.getCurrentUser());
+        val => this.authService.getCurrentUser(),
+        err => err.status == 400 ? alert(err.error) : console.log(err.error));
     }
   }
 

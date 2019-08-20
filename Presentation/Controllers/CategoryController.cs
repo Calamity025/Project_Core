@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using BLL.Interfaces;
@@ -30,15 +31,17 @@ namespace Presentation.Controllers
             {
                 Response.StatusCode = 400;
                 await Response.WriteAsync("Category name should be between 0 and 25 characters");
+                return;
             }
             try
             {
                 await _categoryManagementService.CreateCategory(categoryName);
                 Response.StatusCode = 201;
             }
-            catch
+            catch (Exception e)
             {
                 Response.StatusCode = 500;
+                await Response.WriteAsync(e.ToString());
             }
         }
 
@@ -50,15 +53,17 @@ namespace Presentation.Controllers
             {
                 Response.StatusCode = 400;
                 await Response.WriteAsync("Category name should be between 0 and 25 characters");
+                return;
             }
             try
             {
                 await _categoryManagementService.UpdateCategory(id, categoryName);
                 Response.StatusCode = 204;
             }
-            catch
+            catch (Exception e)
             {
                 Response.StatusCode = 500;
+                await Response.WriteAsync(e.ToString());
             }
         }
 

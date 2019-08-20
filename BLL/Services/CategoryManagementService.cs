@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using BLL.Interfaces;
@@ -17,7 +18,7 @@ namespace BLL.Services
             _db = db;
 
         public async Task<IEnumerable<Category>> GetCategoryList() =>
-            await _db.Categories.GetAll().ToListAsync();
+            await _db.Categories.GetAll().OrderBy(x => x.Name).ToListAsync();
 
         public async Task CreateCategory(string categoryName)
         {

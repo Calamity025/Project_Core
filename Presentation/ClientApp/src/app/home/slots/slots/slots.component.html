@@ -11,10 +11,12 @@
     <button type="button" class="btn btn-outline-primary" (click)="router.navigate(['/slot/create'])" *ngIf="isAuthorized">Cоздать слот</button>
   </div>
 </div>
-<div class="d-flex flex-wrap align-items-start col-12 p-4">
+<div class="d-flex flex-wrap align-items-start col-12 py-4 px-0">
   <h3 *ngIf="!slots || slots.length == 0">Ничего не найдено</h3>
-  <div class="slot border rounded m-2 p-2 px-1" style="width: 13rem; overflow: hidden;" *ngFor="let slot of slots" (click)="onSlotClick(slot)">
-    <img [src]="slot.imageLink ? slot.imageLink : '/SlotImages/default.jpg'" style="height: 200px;" class="img-thumbnail mx-auto d-block mb-2">
+  <div class="slot border rounded m-2 p-2 px-1 d-flex flex-column justify-content-around" style="width: 13rem; overflow: hidden;" *ngFor="let slot of slots" (click)="onSlotClick(slot)">
+    <div class="p-0 d-flex flex-row" style="height: 200px; overflow: hidden;">
+      <img [src]="slot.imageLink ? slot.imageLink : '/SlotImages/default.jpg'" style="width: 100%;" class="img-thumbnail m-auto d-block mb-2">
+    </div>
     <div style="text-align: center">
       <span style="user-select: none">{{slot.name}}</span>
     </div>

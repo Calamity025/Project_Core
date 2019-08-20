@@ -16,5 +16,7 @@ namespace DAL.Interfaces
         DbSet<Category> Categories { get; set; }
         DbSet<Tag> Tags { get; set; }
         DbSet<BetHistory> BetHistories { get; set; }
+        DbSet<SlotTag> SlotTags { get; set; }
+        DbSet<FollowingSlots> FollowingSlots { get; set; }
     }
 }

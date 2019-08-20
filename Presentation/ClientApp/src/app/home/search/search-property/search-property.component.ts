@@ -55,13 +55,13 @@ export class SearchComponent implements OnInit {
   onTagAdd(){
     this.searchService.createTag(this.newTagName)
       .subscribe(() => {this.searchService.refreshTags(); this.isFormActivated = false;},
-      err => alert(err.error));
+      err => err.status == 400 ? alert(err.error) : console.log(err.error));
   }
 
   onCategoryAdd(){
     this.searchService.createCategory(this.newCategoryName)
       .subscribe(() => {this.searchService.refreshCategories(); this.isFormActivated = false; },
-      err => alert(err.error));
+      err => err.status == 400 ? alert(err.error) : console.log(err.error));
   }
 
   onCategoryNameInput(value : string) {
@@ -121,8 +121,8 @@ export class SearchComponent implements OnInit {
     .subscribe(() => {
       this.searchService.refreshTags();
       this.isEditTagOn = false;
-    }),
-    err => alert(err.error); 
+    },
+    err => err.status == 400 ? alert(err.error) : console.log(err.error))
   }
 
   onEditCategoryOn(category : Category){
@@ -141,7 +141,7 @@ export class SearchComponent implements OnInit {
       this.searchService.refreshCategories();
       this.isEditCategoryOn = false;
     },
-    err => alert(err.error)); 
+    err => err.status == 400 ? alert(err.error) : console.log(err.error))
   }
 
   onDeleteTag(tag : Tag){

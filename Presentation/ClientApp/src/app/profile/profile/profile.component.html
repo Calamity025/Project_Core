@@ -43,7 +43,7 @@
               <div id="collapseFollowing" class="collapse" aria-labelledby="headingFollowing" data-parent="#accordion">
                 <div class="acc card-body d-flex flex-row align-items-center p-0 rounded border-bottom" *ngFor="let slot of profile.followingSlots">
                   <div (click)="onSlotClick(slot)" class="d-flex flex-row align-items-center p-0">
-                    <img [src]="slot.imageLink ? slot.imageLink : '/SlotImages/default.jpg'" class="" style="height: 80px; max-width: 80px;">
+                    <img [src]="slot.imageLink ? slot.imageLink : '/SlotImages/default.jpg'" class="" style="height: 80px; max-width: 180px;">
                     <span style="user-select: none" class="ml-5 h5">{{slot.name}}</span>
                   </div>
                   <button type="button" class="btn btn-sm btn-danger mr-2 ml-auto" (click)="onUnsubscribe(slot)">X</button>
@@ -56,7 +56,7 @@
               </div>
               <div id="collapseBet" class="collapse" aria-labelledby="headingBet" data-parent="#accordion">
                 <div (click)="onSlotClick(slot)"  class="acc card-body d-flex flex-row align-items-center p-0 rounded border-bottom" *ngFor="let slot of profile.betSlots">
-                  <img [src]="slot.imageLink ? slot.imageLink : '/SlotImages/default.jpg'" class="" style="height: 80px; max-width: 80px;">
+                  <img [src]="slot.imageLink ? slot.imageLink : '/SlotImages/default.jpg'" class="" style="height: 80px; max-width: 180px;">
                   <span style="user-select: none" class="ml-5 h5">{{slot.name}}</span>
                 </div>
               </div>
@@ -67,7 +67,7 @@
               </div>
               <div id="collapsePlaced" class="collapse" aria-labelledby="headingPlaced" data-parent="#accordion">
                 <div (click)="onSlotClick(slot)"  class="acc card-body d-flex flex-row align-items-center p-0 rounded border-bottom" *ngFor="let slot of profile.placedSlots">
-                  <img [src]="slot.imageLink ? slot.imageLink : '/SlotImages/default.jpg'" class="" style="height: 80px; max-width: 80px;">
+                  <img [src]="slot.imageLink ? slot.imageLink : '/SlotImages/default.jpg'" class="" style="height: 80px; max-width: 180px;">
                   <span style="user-select: none" class="ml-5 h5">{{slot.name}}</span>
                 </div>
               </div>
@@ -78,7 +78,7 @@
               </div>
               <div id="collapseWon" class="collapse" aria-labelledby="headingWon" data-parent="#accordion">
                 <div (click)="onSlotClick(slot)"  class="acc card-body d-flex flex-row align-items-center p-0 rounded border-bottom" *ngFor="let slot of profile.wonSlots">
-                  <img [src]="slot.imageLink ? slot.imageLink : '/SlotImages/default.jpg'" class="" style="height: 80px; max-width: 80px;">
+                  <img [src]="slot.imageLink ? slot.imageLink : '/SlotImages/default.jpg'" class="" style="height: 80px; max-width: 180px;">
                   <span style="user-select: none" class="ml-5 h5">{{slot.name}}</span>
                 </div>
               </div>

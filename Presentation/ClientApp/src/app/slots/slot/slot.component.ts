@@ -103,7 +103,8 @@ export class SlotComponent implements OnInit {
       this.isMakeBetClicked = false;
       this.searchService.updatePrice(this.slotId).subscribe(val => this.slot.price = val);
       this.updateUserBet();
-    });
+    },
+    err => err.status == 400 ? alert(err.error) : console.log(err.error));
   }
 
   onBetInput(value : number){
@@ -128,17 +129,20 @@ export class SlotComponent implements OnInit {
       .subscribe(() => {
         this.router.navigate(['/']);
         this.searchService.getSlots();
-      });
+      },
+      err => err.status == 400 ? alert(err.error) : console.log(err.error));
   }
 
   onFollowClick(){
     if(this.isFollowing){
       this.httpClient.put<any>('https://localhost:44324/api/Profile/unfollow/' + this.slotId, null)
-        .subscribe(() => this.isFollowing = false);
+        .subscribe(() => this.isFollowing = false,
+        err => err.status == 400 ? alert(err.error) : console.log(err.error));
     }
     else{
       this.httpClient.put<any>('https://localhost:44324/api/Profile/follow/' + this.slotId, null)
-        .subscribe(() => this.isFollowing = true);
+        .subscribe(() => this.isFollowing = true,
+        err => err.status == 400 ? alert(err.error) : console.log(err.error));
     }
   }
 
@@ -151,6 +155,7 @@ export class SlotComponent implements OnInit {
       .subscribe(val =>{
         this.searchService.updatePrice(this.slotId).subscribe(val => this.slot.price = val);
         this.updateUserBet();
-      })
+      },
+      err => err.status == 400 ? alert(err.error) : console.log(err.error))
   }
 }

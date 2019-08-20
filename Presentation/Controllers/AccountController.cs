@@ -40,10 +40,18 @@ namespace Presentation.Controllers
                 await WriteErrors();
                 return;
             }
+
+            try
+            {
                 var info = _mapper.Map<IdentityCreationDTO>(userInfo);
                 await _identityService.Register(info);
                 Response.StatusCode = 201;
-            
+            }
+            catch (Exception e)
+            {
+                Response.StatusCode = 500;
+                await Response.WriteAsync(e.ToString());
+            }
         }
 
         [AllowAnonymous]
@@ -115,9 +123,10 @@ namespace Presentation.Controllers
                 await _identityService.AddToRole(userName, "admin");
                 Response.StatusCode = 204;
             }
-            catch
+            catch (Exception e)
             {
                 Response.StatusCode = 500;
+                await Response.WriteAsync(e.ToString());
             }
         }
 

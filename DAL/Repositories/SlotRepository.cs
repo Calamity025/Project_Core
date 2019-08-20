@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DAL.Interfaces;
 using Entities;
@@ -26,5 +27,11 @@ namespace DAL.Repositories
 
         public void Delete(Slot slot) =>
             _context.Slots.Remove(slot);
+
+        public void CreateSlotTag(SlotTag item) =>
+            _context.SlotTags.Add(item);
+
+        public void DeleteSlotTag(SlotTag item) =>
+            _context.SlotTags.Remove(item);
     }
 }

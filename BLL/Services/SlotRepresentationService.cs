@@ -47,13 +47,14 @@ namespace BLL.Services
         {
             var slot = await _db.Slots.GetAll().Where(x => x.Id == id)
                 .Include(x => x.SlotTags)
+                .ThenInclude(x => x.Tag)
                 .Include(x=> x.Category)
                 .FirstOrDefaultAsync();
             if (slot == null)
             {
                 throw new NotFoundException();
             }
-            var user = await _db.UserInfos.GetAsync(slot.UserId);
+            var user = await _db.UserInfos.GetAsync(slot.UserInfoId);
             if (user == null)
             {
                 throw new NotFoundException();
@@ -90,7 +91,7 @@ namespace BLL.Services
         public async Task<decimal> GetUserBet(int id, int userId)
         {
             var slot = await _db.BetHistories.GetAll()
-                .Where(x => x.Slot.Id == id && x.UserId == userId)
+                .Where(x => x.Slot.Id == id && x.BetUserInfoId == userId)
                 .OrderByDescending(x => x.Price )
                 .FirstOrDefaultAsync();
             if (slot == null)
@@ -125,12 +126,12 @@ namespace BLL.Services
             int slotsOnPage)
         {
             IEnumerable<Slot> slots = await _db.Slots.GetAll()
-                .Where(slot => tagIds.All(id => slot.SlotTags.Any(tag => tag.Id == id)) && 
+                .Where(slot => tagIds.All(id => slot.SlotTags.Any(tag => tag.TagId == id)) && 
                                 slot.Status.Equals(Status.SlotStatus.Started.ToString()))
-                .OrderBy(x => x.Id).Skip(--pageNumber * slotsOnPage)
-                .Take(slotsOnPage).ToListAsync();
+                .OrderBy(x => x.Id).Skip(--pageNumber * slotsOnPage).Take(slotsOnPage)
+                .ToListAsync();
             var count = await _db.Slots.GetAll()
-                .Where(slot => tagIds.All(id => slot.SlotTags.Any(tag => tag.Id == id)) && 
+                .Where(slot => tagIds.All(id => slot.SlotTags.Any(tag => tag.TagId == id)) && 
                                 slot.Status.Equals(Status.SlotStatus.Started.ToString()))
                 .CountAsync();
             List<SlotMinimumDTO> page = new List<SlotMinimumDTO>();

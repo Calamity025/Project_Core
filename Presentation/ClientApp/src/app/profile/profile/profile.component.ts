@@ -4,7 +4,6 @@ import { ProfileService } from '../../services/profile.service';
 import { User, Profile } from 'src/app/models';
 import { slotMinimum } from 'src/app/models/slotMinimum';
 import { Router } from '@angular/router';
-import { Tag } from 'src/app/models/tag';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Component({
@@ -57,9 +56,9 @@ export class ProfileComponent implements OnInit {
   }
 
   onPromote(user : User){
-    alert(user.name)
     this.httpClient.put<any>('https://localhost:44324/Account', `"${user.name}"`, 
     { headers: new HttpHeaders({'Content-Type': 'application/json'})})
-      .subscribe(val => this.onGetUsers());
+      .subscribe(val => this.onGetUsers(),
+      err => err.status == 400 ? alert(err.error) : console.log(err.error));
   }
 }

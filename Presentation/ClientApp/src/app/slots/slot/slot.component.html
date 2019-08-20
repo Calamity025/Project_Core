@@ -9,7 +9,7 @@
         <button type="button" class="btn px-1" [class.btn-outline-primary]="isFollowing" [class.btn-primary]="!isFollowing" (click)="onFollowClick()">Следить</button>
       </div>
       <div class="px-1">
-        <button type="button" class="btn btn-warning px-1" *ngIf="isAuthorized && isSeller" (click)="onEditClick()">Редактировать</button>
+        <button type="button" class="btn btn-warning px-1" *ngIf="isAuthorized && (isSeller || currentUser.roles.includes('admin'))" (click)="onEditClick()">Редактировать</button>
       </div>
       <div class="px-1">
         <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal" *ngIf="isAuthorized && isSeller">Удалить</button>
@@ -100,11 +100,12 @@
           </div>
           <div class="mx-auto my-2 p-2 d-flex flex-wrap flex-column align-items-center">
             <form *ngIf="isMakeBetClicked">
-              <div class="input-group">
+              <div class="input-group" style="text-align: center">
                 <input name="bet" type="number" class="form-control" id="bet" [class.is-invalid]="isNotValid" [step]="slot.step" [min]="slot.price ? slot.price + slot.step : slot.starterPrice + slot.step" (input)="onBetInput($event.target.value)"/><br>
                 <div class="input-group-append">
                     <button class="btn btn-success" type="button" (click)="onMakeBetClick()">Поставить</button>
                 </div>
+                <span class="pt-2" style="color: red" *ngIf="isNotValid">Ставка должна быть больше текущей цены + шаг, а так же у Вас должно хватать средств на балансе</span>
             </div>
             </form>
             <button type="button" class="btn btn-lg btn-success" *ngIf="!isMakeBetClicked" [disabled]="!isAuthorized || isSeller || slot.status != 'Started'"  (click)="onBetClick()">Сделать ставку</button>
