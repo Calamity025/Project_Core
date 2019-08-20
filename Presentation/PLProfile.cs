@@ -14,6 +14,7 @@ namespace Presentation
                     opt => opt.MapFrom(x=>x.Login));
             CreateMap<LoginInfoModel, LoginInfoDTO>();
             CreateMap<ProfileCreationModel, ProfileCreationDTO>();
+            CreateMap<SlotUpdateModel, SlotUpdateDTO>();
         }
     }
 }

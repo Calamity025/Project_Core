@@ -44,8 +44,7 @@ export class SlotComponent implements OnInit {
       if(this.timeDifference <= 0){
         clearInterval(this.timeinterval);
         this.searchService.getSlot(this.slotId).subscribe(val => {
-          this.slot = val;},
-          err => alert(err.error))
+          this.slot = val;})
       }}, 1000);
       this.authService.currentUser$.subscribe(val => {
         if(val){
@@ -71,8 +70,7 @@ export class SlotComponent implements OnInit {
       else{
         this.userBet = null;
       }
-    },
-    err => alert(err.error));
+    });
   }
 
   onBackClick(){
@@ -105,8 +103,7 @@ export class SlotComponent implements OnInit {
       this.isMakeBetClicked = false;
       this.searchService.updatePrice(this.slotId).subscribe(val => this.slot.price = val);
       this.updateUserBet();
-    },
-    err => alert(err.error));
+    });
   }
 
   onBetInput(value : number){
@@ -123,26 +120,25 @@ export class SlotComponent implements OnInit {
   }
 
   onRefreshClick(){
-    this.searchService.updatePrice(this.slotId).subscribe(val => this.slot.price = val,
-      err => alert(err.error));
+    this.searchService.updatePrice(this.slotId).subscribe(val => this.slot.price = val);
   }
 
   onDeleteClick() {
     this.httpClient.delete<any>('https://localhost:44324/api/Slot/' + this.slotId)
-      .subscribe(() => this.router.navigate(['/']),
-      err => alert(err.error));
+      .subscribe(() => {
+        this.router.navigate(['/']);
+        this.searchService.getSlots();
+      });
   }
 
   onFollowClick(){
     if(this.isFollowing){
       this.httpClient.put<any>('https://localhost:44324/api/Profile/unfollow/' + this.slotId, null)
-        .subscribe(() => this.isFollowing = false,
-        err => alert(err.error));
+        .subscribe(() => this.isFollowing = false);
     }
     else{
       this.httpClient.put<any>('https://localhost:44324/api/Profile/follow/' + this.slotId, null)
-        .subscribe(() => this.isFollowing = true,
-        err => alert(err.error));
+        .subscribe(() => this.isFollowing = true);
     }
   }
 
@@ -155,7 +151,6 @@ export class SlotComponent implements OnInit {
       .subscribe(val =>{
         this.searchService.updatePrice(this.slotId).subscribe(val => this.slot.price = val);
         this.updateUserBet();
-      },
-      err => alert(err.error))
+      })
   }
 }

@@ -27,7 +27,7 @@ namespace BLL.Services
             _slotManagementService = slotManagementService;
         }
 
-        public async Task<UserDTO> Register(IdentityCreationDTO identityCreation)
+        public async Task Register(IdentityCreationDTO identityCreation)
         {
             if (await _identity.UserManager.FindByNameAsync(identityCreation.UserName) != null)
             {
@@ -40,15 +40,14 @@ namespace BLL.Services
             try
             {
                 await _identity.UserManager.CreateAsync(user, identityCreation.Password);
-                await _identity.UserManager.AddClaimAsync(user, new Claim(ClaimsIdentity.DefaultNameClaimType, user.UserName));
-                await _identity.UserManager.AddClaimAsync(user, new Claim("Id", user.Id.ToString()));
+                await _identity.UserManager
+                    .AddClaimAsync(user, new Claim(ClaimsIdentity.DefaultNameClaimType, user.UserName));
+                await _identity.UserManager
+                    .AddClaimAsync(user, new Claim("Id", user.Id.ToString()));
                 await _identity.UserManager.AddToRoleAsync(user, "user");
-                return _mapper.Map<UserDTO>(user);
             }
             catch (Exception e)
             {
-                _db.UserInfos.Delete(info);
-                await _db.SaveChangesAsync();
                 throw new DatabaseException("Error when creating identity", e);
             }
         }
@@ -58,8 +57,10 @@ namespace BLL.Services
             User user = await _identity.UserManager.FindByNameAsync(loginInfoDto.Login);
             if (user != null && await _identity.UserManager.CheckPasswordAsync(user, loginInfoDto.Password))
             {
-                var claims = await _identity.UserManager.GetClaimsAsync(user);
-                foreach (var role in await _identity.UserManager.GetRolesAsync(user))
+                var claimsTask = _identity.UserManager.GetClaimsAsync(user);
+                var rolesTask = _identity.UserManager.GetRolesAsync(user);
+                var claims = await claimsTask;
+                foreach (var role in await rolesTask)
                 {
                     var roleClaim = new Claim(ClaimTypes.Role, role);
                     claims.Add(roleClaim);
@@ -86,7 +87,11 @@ namespace BLL.Services
 
         public async Task DeleteIdentity(string name)
         {
-            User user = await _identity.UserManager.FindByNameAsync(name);
+            var user = await _identity.UserManager.FindByNameAsync(name);
+            if (user == null)
+            {
+                throw new NotFoundException();
+            }
             var slots = await _db.Slots.GetAll().Where(x => x.UserId == user.Id).ToListAsync();
             foreach (var slot in slots)
             {
@@ -111,7 +116,9 @@ namespace BLL.Services
         {
             var user = await _identity.UserManager.FindByNameAsync(userName);
             if (user != null)
+            {
                 await _identity.UserManager.AddToRoleAsync(user, role);
+            }
         }
 
         public async Task<IEnumerable<UserDTO>> GetUsers()

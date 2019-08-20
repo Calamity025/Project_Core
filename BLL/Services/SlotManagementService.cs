@@ -24,13 +24,16 @@ namespace BLL.Services
 
         public async Task<int> CreateSlot(int userId, SlotCreationDTO slotDTO)
         {
-            UserInfo seller = await _db.UserInfos.GetAsync(userId);
-            Category category = await _db.Categories.GetAsync(slotDTO.CategoryId);
+            var sellerTask = _db.UserInfos.GetAsync(userId);
+            var categoryTask = _db.Categories.GetAsync(slotDTO.CategoryId);
+            var tagsTask = _db.Tags.GetAll().Where(x => slotDTO.SlotTagIds.Contains(x.Id)).ToListAsync();
+            var seller = await sellerTask;
+            var category = await categoryTask;
             if (seller == null || category == null)
             {
                 throw new NotFoundException();
             }
-            List<Tag> tags = await _db.Tags.GetAll().Where(x => slotDTO.SlotTagIds.Contains(x.Id)).ToListAsync();
+            var tags = await tagsTask;
             var newSlot = _mapper.Map<Slot>(slotDTO);
             newSlot.Category = category;
             newSlot.SlotTags = tags;
@@ -53,15 +56,18 @@ namespace BLL.Services
 
         public async Task<string> DeleteSlot(int slotId, int userId)
         {
-            Slot slot = await _db.Slots.GetAll().Where(x => x.Id == slotId)
+            var slotTask = _db.Slots.GetAll().Where(x => x.Id == slotId)
                 .Include(x => x.SlotTags).FirstOrDefaultAsync();
-            var user = await _db.UserInfos.GetAsync(userId);
-            List<BetHistory> histories = await _db.BetHistories.GetAll()
+            var userTask = _db.UserInfos.GetAsync(userId);
+            var historiesTask = _db.BetHistories.GetAll()
                 .Where(x => x.Slot.Id == slotId).ToListAsync();
+            var slot = await slotTask;
+            var user = await userTask;
             if (slot == null || user == null)
             {
                 throw new NotFoundException();
             }
+            var histories = await historiesTask;
             slot.SlotTags = null;
             await _db.SaveChangesAsync();
             _db.Slots.Delete(slot);
@@ -83,7 +89,7 @@ namespace BLL.Services
 
         public async Task AddImageLink(int id, string link)
         {
-            Slot slot = await _db.Slots.GetAsync(id);
+            var slot = await _db.Slots.GetAsync(id);
             if (slot == null)
             {
                 throw new NotFoundException();
@@ -101,7 +107,7 @@ namespace BLL.Services
 
         public async Task UpdateGeneralInfo(int slotId, SlotUpdateDTO slotInfo)
         {
-            Slot slot = await _db.Slots.GetAll().Where(x => x.Id == slotId)
+            var slot = await _db.Slots.GetAll().Where(x => x.Id == slotId)
                 .Include(x => x.SlotTags).FirstOrDefaultAsync();
             if (slot == null)
             {
@@ -134,7 +140,7 @@ namespace BLL.Services
 
         public async Task UpdateStatus(int slotId, Status.SlotStatus status)
         {
-            Slot slot = await _db.Slots.GetAsync(slotId);
+            var slot = await _db.Slots.GetAsync(slotId);
             if (slot == null)
             {
                 throw new NotFoundException();
@@ -153,16 +159,19 @@ namespace BLL.Services
 
         public async Task MakeBet(int slotId, int userId, decimal bet)
         {
-            var slot = await _db.Slots.GetAsync(slotId);
-            var user = await _db.UserInfos.GetAsync(userId);
+            var slotTask = _db.Slots.GetAsync(slotId);
+            var userTask = _db.UserInfos.GetAsync(userId);
+            var maxSlotBetTask = _db.BetHistories.GetAll()
+                .Where(x => x.Slot.Id == slotId)
+                .OrderByDescending(x => x.Price)
+                .FirstOrDefaultAsync();
+            var slot = await slotTask;
+            var user = await userTask;
             if (slot == null || user == null)
             {
                 throw new NotFoundException();
             }
-            var maxSlotBet = await _db.BetHistories.GetAll()
-                .Where(x => x.Slot.Id == slotId)
-                .OrderByDescending(x => x.Price)
-                .FirstOrDefaultAsync();
+            var maxSlotBet = await maxSlotBetTask;
             if (maxSlotBet == null && (bet < slot.StarterPrice && bet - slot.MinBet < slot.StarterPrice) ||
                 maxSlotBet != null && (bet < maxSlotBet.Price || bet - slot.MinBet < maxSlotBet.Price))
             {
@@ -186,9 +195,11 @@ namespace BLL.Services
 
         public async Task UndoBet(int slotId, int userId)
         {
-            var bets = await _db.BetHistories.GetAll()
+            var betsTask = _db.BetHistories.GetAll()
                 .Where(x => x.Slot.Id == slotId && x.UserId == userId).ToListAsync();
-            var user = await _db.UserInfos.GetAsync(userId);
+            var userTask = _db.UserInfos.GetAsync(userId);
+            var bets = await betsTask;
+            var user = await userTask;
             if (bets == null || user == null)
             {
                 throw new NotFoundException();

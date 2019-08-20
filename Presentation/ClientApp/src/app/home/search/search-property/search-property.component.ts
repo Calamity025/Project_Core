@@ -121,8 +121,8 @@ export class SearchComponent implements OnInit {
     .subscribe(() => {
       this.searchService.refreshTags();
       this.isEditTagOn = false;
-    },
-    err => alert(err.error)); 
+    }),
+    err => alert(err.error); 
   }
 
   onEditCategoryOn(category : Category){
@@ -146,7 +146,6 @@ export class SearchComponent implements OnInit {
 
   onDeleteTag(tag : Tag){
     this.httpClient.delete<any>('https://localhost:44324/api/Tag/' + tag.id)
-    .subscribe(() => this.searchService.refreshTags(),
-    err => alert(err.error));
+    .subscribe(() => this.searchService.refreshTags());
   }
 }

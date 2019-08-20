@@ -84,7 +84,6 @@ namespace Presentation.Controllers
             }
             catch
             {
-                Response.StatusCode = 404;
                 return null;
             }
         }
@@ -109,7 +108,6 @@ namespace Presentation.Controllers
             }
             catch
             {
-                Response.StatusCode = 404;
                 return null;
             }
         }
