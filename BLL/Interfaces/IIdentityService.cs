@@ -7,7 +7,7 @@ namespace BLL.Interfaces
 {
     public interface IIdentityService
     {
-        Task<UserDTO> Register(IdentityCreationDTO identity);
+        Task Register(IdentityCreationDTO identity);
         Task<ClaimsIdentity> Login(LoginInfoDTO infoDto, string authType);
         Task<UserDTO> GetCurrentUser(string name);
         Task DeleteIdentity(string name);

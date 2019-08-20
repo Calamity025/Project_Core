@@ -19,7 +19,7 @@ export class SearchService {
   selectedCategory = new BehaviorSubject<Category>(null);
   selectedTags = new BehaviorSubject<Tag[]>([]);
   page : number = 1;
-  itemsOnPage : number = 20;
+  itemsOnPage : number = 1;
   numberOfPages? : number;
   isTags = false;
   isCategory = false;
@@ -36,22 +36,22 @@ export class SearchService {
         .subscribe(val => {
           this.selectedSlots.next(val.slots);
           this.numberOfPages = parseInt(val.numberOfPages);
-        },
-        err => alert(err.error));
+        });
     }
 
     this.selectedCategory.subscribe(val => this.isCategory = !!val);
     this.selectedTags.subscribe(val => this.isTags = val.length > 0 ? true : false);
   }
 
-  createCategory(name : string) : Observable<Category> {
-    let category : Category = {id : -1, name : name}
-    return this.httpClient.post<Category>(PATH + 'Category', category);
+  createCategory(name : string) : Observable<any> {
+    return this.httpClient.post<any>(PATH + 'Category', `"${name}"`, 
+    { headers: new HttpHeaders({'Content-Type': 'application/json'})})
   }
   
-  createTag(name : string) : Observable<Tag> {
+  createTag(name : string) : Observable<any> {
     let tag : Tag = {id : -1, name : name}
-    return this.httpClient.post<Category>(PATH + 'Tag', tag);
+    return this.httpClient.post<any>(PATH + 'Tag', `"${name}"`, 
+    { headers: new HttpHeaders({'Content-Type': 'application/json'})})
   }
 
   getCategoryList() : Observable<Category[]> {
@@ -74,8 +74,7 @@ export class SearchService {
       .subscribe(val => {
         this.selectedSlots.next(val.slots);
         this.numberOfPages = parseInt(val.numberOfPages);
-      },
-      err => alert(err.error));
+      });
   }
 
   getSlotsByTags(tags : number[]){
@@ -90,8 +89,7 @@ export class SearchService {
       .subscribe(val => {
         this.selectedSlots.next(val.slots);
         this.numberOfPages = parseInt(val.numberOfPages);
-      },
-      err => alert(err.error));
+      });
   }
 
   getSlotsByName(name : string){
@@ -107,8 +105,7 @@ export class SearchService {
       .subscribe(val => {
         this.selectedSlots.next(val.slots);
         this.numberOfPages = parseInt(val.numberOfPages);
-      },
-      err => alert(err.error));
+      });
   }
 
   getSlots(){
@@ -116,8 +113,7 @@ export class SearchService {
         .subscribe(val => {
           this.selectedSlots.next(val.slots);
           this.numberOfPages = parseInt(val.numberOfPages);
-        },
-        err => alert(err.error));
+        });
   }
 
   getSlot(id : string) : Observable<Slot> {

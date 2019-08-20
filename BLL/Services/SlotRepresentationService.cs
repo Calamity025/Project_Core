@@ -25,12 +25,14 @@ namespace BLL.Services
         public async Task<Page> GetPage(int pageNumber, 
             int slotsOnPage)
         {
-            var slots = await _db.Slots.GetAll()
+            var slotsTask = _db.Slots.GetAll()
                 .Where(x => x.Status.Equals(Status.SlotStatus.Started.ToString()))
                 .OrderBy(x => x.Id).Skip(--pageNumber * slotsOnPage).Take(slotsOnPage).ToListAsync();
-            var count = await _db.Slots.GetAll()
+            var countTask = _db.Slots.GetAll()
                 .Where(x => x.Status.Equals(Status.SlotStatus.Started.ToString()))
                 .CountAsync();
+            var slots = await slotsTask;
+            var count = await countTask;
             List<SlotMinimumDTO> page = new List<SlotMinimumDTO>();
             foreach (var slot in slots)
             {
@@ -43,7 +45,7 @@ namespace BLL.Services
 
         public async Task<SlotFullDTO> GetSlot(int id)
         {
-            Slot slot = await _db.Slots.GetAll().Where(x => x.Id == id)
+            var slot = await _db.Slots.GetAll().Where(x => x.Id == id)
                 .Include(x => x.SlotTags)
                 .Include(x=> x.Category)
                 .FirstOrDefaultAsync();

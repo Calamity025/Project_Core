@@ -55,16 +55,13 @@ export class ProfileCreationComponent implements OnInit {
     this.httpClient.post<any>('https://localhost:44324/api/Profile/', user)
       .subscribe(() =>{
           this.router.navigate(["/"]);
-          this.authService.getCurrentUser();
-        },
-        err => alert(err.error));
+        });
 
     if(this.uploadForm.get('profile').value){
       const formData = new FormData();
       formData.append('file', this.uploadForm.get('profile').value);
       this.httpClient.post<any>('https://localhost:44324/api/Profile/image', formData).subscribe(
-        err => alert(err.error)
-      );
+        val => this.authService.getCurrentUser());
     }
   }
 
