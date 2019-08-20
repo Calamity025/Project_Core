@@ -40,10 +40,16 @@ namespace Presentation.Controllers
                 await WriteErrors();
                 return;
             }
+            try
+            {
                 var info = _mapper.Map<IdentityCreationDTO>(userInfo);
                 await _identityService.Register(info);
                 Response.StatusCode = 201;
-            
+            }
+            catch
+            {
+                Response.StatusCode = 500;
+            }
         }
 
         [AllowAnonymous]

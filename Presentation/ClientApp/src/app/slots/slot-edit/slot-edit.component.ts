@@ -38,7 +38,6 @@ export class SlotEditComponent implements OnInit {
   description? : string;
   title? : string;
   currentUser? : User;
-  isAuthorized? = false;
 
   constructor(private route: ActivatedRoute,
     private router : Router,
@@ -54,15 +53,15 @@ export class SlotEditComponent implements OnInit {
       this.selectedTags = this.slot.slotTags;
       this.currentCount = this.slot.slotTags.length;
       this.selectedCategory = this.slot.category;
-    })
+    },
+    err => alert(err.error))
     this.uploadForm = this.formBuilder.group({
       profile: ['']
     });
-    this.authService.currentUser$.subscribe(val => this.currentUser = val);
+    this.authService.currentUser$.subscribe(val => {this.currentUser = val; alert(this.currentUser)});
     if(this.searchService.tags.length == 0 || this.searchService.categories.length == 0) {
       this.searchService.refresh();
     }
-    this.authService.isAuthorized$.subscribe(val => this.isAuthorized = val);
   }
 
   onFileSelect(event) {
@@ -126,13 +125,17 @@ export class SlotEditComponent implements OnInit {
           formData.append('file', this.uploadForm.get('profile').value);
           this.httpClient.put<any>('https://localhost:44324/api/Slot/image/' + this.slotId, formData)
           .subscribe(val => {
+            if(val){
               this.router.navigate(['/slot/'+this.slotId]);
-            })
+              }
+            },
+            err => alert(err.error))
         }
         else{
-          this.router.navigate(['/slot/' + this.slotId]);
+          this.router.navigate(['/slot/'+this.slotId]);
         }
-    });
+    },
+    err => alert(err.error));
   }
 
   onDescriptionInput(value : string){
@@ -146,6 +149,8 @@ export class SlotEditComponent implements OnInit {
   onChangeStatusClick(){
     this.httpClient.put<any>('https://localhost:44324/api/Slot/' + this.slotId + '/status', `"${this.selectedStatus}"`, 
     { headers: new HttpHeaders({'Content-Type': 'application/json'})}).subscribe(() => this.searchService.getSlot(this.slotId).subscribe(val => {
-      this.slot = val;}));
+      this.slot = val;},
+      err => alert(err.error)),
+      err => alert(err.error));
   }
 }

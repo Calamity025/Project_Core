@@ -53,7 +53,8 @@ export class AuthService {
         console.log(x);
           this.currentUser$.next(x);
           this.isAuthorized$.next(true);
-        });
+        },
+        err => alert(err.error));
       }
     }
 
@@ -63,6 +64,7 @@ export class AuthService {
       .subscribe(val => {
         this.currentUser.balance = parseFloat(val);
         this.currentUser$.next(this.currentUser);
-      })
+      },
+      err => alert(err.error))
     }
 }

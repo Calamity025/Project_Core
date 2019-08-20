@@ -32,7 +32,8 @@ export class ProfileComponent implements OnInit {
         this.users = [];
       } 
       else {
-        this.profileService.getProfile().subscribe(val => this.profile = val);
+        this.profileService.getProfile().subscribe(val => this.profile = val,
+          err => alert(err.error));
       }});
   }
 
@@ -41,25 +42,30 @@ export class ProfileComponent implements OnInit {
   }
 
   onUnsubscribe(slot : slotMinimum){
-    this.profileService.unfollowSlot(slot.id).subscribe(() => this.profileService.getProfile().subscribe(val => this.profile = val));
+    this.profileService.unfollowSlot(slot.id).subscribe(() => this.profileService.getProfile().subscribe(val => this.profile = val,
+      err => alert(err.error)),
+    err => alert(err.error));
   }
 
   onDeleteClick(){
     this.profileService.deleteUser().subscribe(val => {
       this.authService.signOut();
       this.router.navigate(['/']);
-    })
+    },
+    err => alert(err.error))
   }
 
   onGetUsers(){
     this.httpClient.get<User[]>('https://localhost:44324/Account')
-      .subscribe(val => {this.users = val});
+      .subscribe(val => {this.users = val},
+        err => alert(err.error));
   }
 
   onPromote(user : User){
     alert(user.name)
     this.httpClient.put<any>('https://localhost:44324/Account', `"${user.name}"`, 
     { headers: new HttpHeaders({'Content-Type': 'application/json'})})
-      .subscribe(val => this.onGetUsers());
+      .subscribe(val => this.onGetUsers()
+      ,err => alert(err.error));
   }
 }

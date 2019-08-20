@@ -87,10 +87,8 @@ namespace BLL.Services
 
         public async Task AddToUserFollowingList(int userId, int slotId)
         {
-            var userTask = _db.UserInfos.GetAsync(userId);
-            var slotTask = _db.Slots.GetAsync(slotId);
-            var user = await userTask;
-            var slot = await slotTask;
+            UserInfo user = await _db.UserInfos.GetAsync(userId);
+            Slot slot = await _db.Slots.GetAsync(slotId);
             if (user == null || slot == null)
             {
                 throw new NotFoundException();
@@ -113,10 +111,8 @@ namespace BLL.Services
 
         public async Task RemoveFromUserFollowingList(int userId, int slotId)
         {
-            var userTask = _db.UserInfos.GetAsync(userId);
-            var slotTask = _db.Slots.GetAsync(slotId);
-            var user = await userTask;
-            var slot = await slotTask;
+            UserInfo user = await _db.UserInfos.GetAsync(userId);
+            Slot slot = await _db.Slots.GetAsync(slotId);
             if (user == null || slot == null)
             {
                 throw new NotFoundException();
